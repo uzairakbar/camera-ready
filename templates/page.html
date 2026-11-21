@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ config.title }}{% endblock title %}
+{% block description %}{{ page.description or page.title }}{% endblock description %}
+
+{%- block math %}
+{%- if page.content is containing(pat="$<code>") %}
+{% include "partials/math.html" %}
+{%- endif %}
+{%- endblock math %}
+
+{% block content %}
+{%- set indent = page.extra.indent if page.extra.indent is defined else config.extra.indent_paragraphs %}
+<article{% if indent %} class="indent-pars"{% endif %}>
+<div class="title-block">
+  <h1>{{ page.title }}</h1>
+{%- if page.date %}
+{#- `show_author = false` drops the default author line: on a personal site
+    it repeats the header. A post that names its own `authors` still shows them. -#}
+{%- set show_author = config.extra.show_author if config.extra.show_author is defined else true %}
+{%- if page.authors %}
+  <p class="author">{{ page.authors | join(sep=", ") }}</p>
+{%- elif show_author %}
+  <p class="author">{{ config.author or config.title }}</p>
+{%- endif %}
+  <p class="date"><time datetime="{{ page.date | date(format='%Y-%m-%d') }}">{{ page.date | date(format=config.extra.date_format or "%-d %B %Y") }}</time>{% if page.updated %} (revised <time datetime="{{ page.updated | date(format='%Y-%m-%d') }}">{{ page.updated | date(format=config.extra.date_format or "%-d %B %Y") }}</time>){% endif %}</p>
+{%- if page.taxonomies and page.taxonomies.tags %}
+  <p class="post-tags">{{ <cr.tags of={page} /> }}</p>
+{%- endif %}
+{%- endif %}
+</div>
+{%- if page.extra.abstract %}
+<div class="abstract">
+  <h2 class="no-number">{{ config.extra.headings?.abstract or "Abstract" }}</h2>
+  {{ page.extra.abstract | markdown | safe }}
+</div>
+{%- endif %}
+{%- if page.extra.toc and page.toc %}
+<nav class="toc" aria-label="Contents">
+  <h2 class="no-number">{{ config.extra.headings?.contents or "Contents" }}</h2>
+  <ol>
+{%- for h in page.toc %}
+    <li><a href="{{ h.permalink | safe }}">{{ h.title }}</a>
+{%- if h.children %}
+      <ol>
+{%- for c in h.children %}
+        <li><a href="{{ c.permalink | safe }}">{{ c.title }}</a></li>
+{%- endfor %}
+      </ol>
+{%- endif %}
+    </li>
+{%- endfor %}
+  </ol>
+</nav>
+{%- endif %}
+{{ page.content | safe }}
+</article>
+{% endblock content %}

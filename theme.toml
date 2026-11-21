@@ -1,0 +1,101 @@
+name = "camera-ready"
+description = "An academic homepage and blog that looks like a LaTeX paper. No JavaScript required, nothing loaded from other sites."
+license = "MIT"
+homepage = "https://github.com/uzairakbar/camera-ready"
+tags = ["academic", "personal", "blog", "latex", "math", "minimal", "dark mode", "no javascript"]
+min_version = "0.23.0"
+demo = "https://uzairakbar.github.io/camera-ready/"
+
+[author]
+name = "Camera Ready contributors"
+homepage = "https://github.com/uzairakbar/camera-ready"
+
+# Defaults for every option. Copy any of these into the [extra] section of
+# your own zola.toml to change it.
+[extra]
+# Small line under your name in the header.
+subtitle = ""
+# Links after the menu. Give `icon` to show an icon instead of the name:
+# [{ name = "GitHub", url = "https://github.com/you", icon = "github" }]
+# Icons: github, gitlab, linkedin, x, twitter, scholar, google-scholar, orcid,
+# youtube, instagram, bluesky, mastodon, email, cv, rss, link.
+links = []
+# Where the icon links go: "footer" (right-hand side) or "header" (after the
+# menu).
+links_position = "footer"
+# Also list the links as words under the bio on the homepage.
+bio_links = true
+# A small search field in the header. It sends the query to DuckDuckGo,
+# limited to your site. Nothing is loaded from DuckDuckGo.
+search = false
+# Let "/" jump to the search field. A few lines of JavaScript; the field
+# works without it.
+search_shortcut = false
+# The site to search, if not the one in base_url: "example.org".
+search_site = ""
+# A light/dark button in the header. This is the theme's only JavaScript;
+# without it the site simply follows the visitor's system setting.
+scheme_toggle = false
+# Top-right navigation: [{ name = "papers", url = "@/papers.md" }]
+menu = []
+# Portrait on the homepage, e.g. "img/portrait.jpg" (in static/). Empty for none.
+photo = ""
+# "margin" hangs the portrait in the right margin on wide screens, like a
+# sidenote; "inline" always keeps it inside the text column.
+photo_position = "margin"
+# Set to false to leave the portrait out on phone-width screens.
+photo_on_phones = true
+photo_alt = ""
+# Spellings of your name to underline in author lists. Defaults to the site title.
+author_names = []
+# Homepage sections, in order. Remove one to hide it.
+home_sections = ["news", "selected", "projects"]
+# Data files, relative to the site root.
+publications = "data/publications.bib"
+# Optional: co-author names and their pages, linked in author lists.
+authors = "data/authors.toml"
+news = "data/news.toml"
+projects = "data/projects.toml"
+# Internal link to the full list, shown beside "Selected works". Empty for none.
+# How projects are laid out: "cards" (image on top) or "rows" (like papers).
+projects_style = "cards"
+# Up to this many publications the homepage lists them all, under
+# "Publications". Past it, the homepage shows the entries marked `selected`
+# and links to the papers page. 0 always uses the selected list.
+papers_limit = 20
+# Print your name under the title of every post. Posts that set `authors`
+# in their front matter always show them.
+show_author = true
+# Show given names as initials in author lists: "A. M. Lovelace".
+author_initials = false
+papers_page = "@/papers.md"
+# News: how many items show before "Older news", and how long "New!" lasts.
+news_visible = 5
+news_recent_days = 90
+# Image shown beside recent news items, a file in static/. Empty for the
+# built-in drawn badge.
+new_badge = "camera-ready-new.gif"
+# strftime format of the date beside each news item.
+news_date_format = "%m/%Y"
+# Printed under a publication list when an author is marked with *.
+equal_note = "* equal contribution"
+# One accent colour for links and the "New!" badge, and its dark-mode variant.
+accent = "#0a7d55"
+accent_dark = "#58d0a3"
+# Colour of the note tag beside a venue ("Oral", "Spotlight").
+note_color = "#b3127a"
+note_color_dark = "#f58ad0"
+# "auto" follows the visitor's system; "light" and "dark" force one.
+color_scheme = "auto"
+# "latin-modern" or "libertinus". Site-wide; only the chosen family is loaded.
+font = "latin-modern"
+# Typesetting switches.
+justify = false
+indent_paragraphs = false
+numbered_headings = false
+# strftime format for dates on posts and the notes index.
+date_format = "%-d %B %Y"
+# Footer text (markdown). Empty for the default copyright line.
+footer = ""
+# Path to a favicon in static/. Empty for none.
+favicon = ""

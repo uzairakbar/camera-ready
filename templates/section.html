@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} · {{ config.title }}{% endblock title %}
+{% block description %}{{ section.description or section.title ~ " by " ~ config.title }}{% endblock description %}
+
+{%- block math %}
+{%- if section.content is containing(pat="$<code>") %}
+{% include "partials/math.html" %}
+{%- endif %}
+{%- endblock math %}
+
+{% block content %}
+<article>
+<h1>{{ section.title }}</h1>
+{{ section.content | safe }}
+{%- if section.pages %}
+{{ <cr.tagrow taxonomies={config.taxonomies} label={config.extra.headings?.tags or "view by tag"} /> }}
+{{ <cr.postlist pages={section.pages} date_format={config.extra.date_format or "%-d %B %Y"} /> }}
+{%- endif %}
+{%- if section.subsections %}
+<ol class="toc-list">
+{%- for path in section.subsections %}
+{%- set sub = get_section(path=path, metadata_only=true) %}
+  <li><div class="toc-entry"><a href="{{ sub.permalink }}">{{ sub.title }}</a></div></li>
+{%- endfor %}
+</ol>
+{%- endif %}
+</article>
+{% endblock content %}

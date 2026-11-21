@@ -1,0 +1,19 @@
+# Build output
+/public/
+/processed_images/
+/static/processed_images/
+
+# Private preview content must never be committed here. Keep it in a
+# separate folder outside this repository.
+/preview/
+/private/
+
+# Editor and OS leftovers
+.DS_Store
+*.swp
+.idea/
+.vscode/
+node_modules/
+
+# The development brief names the owner; it stays local.
+/CLAUDE.md

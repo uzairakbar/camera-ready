@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} · {{ config.title }}{% endblock title %}
+{% block description %}{{ page.description or page.title ~ " by " ~ config.title }}{% endblock description %}
+
+{%- block math %}
+{%- set pubs_text = load_data(path=config.extra.publications or "data/publications.bib", format="plain", required=false) or "" %}
+{%- if page.content is containing(pat="$<code>") or pubs_text is containing(pat="$") %}
+{% include "partials/math.html" %}
+{%- endif %}
+{%- endblock math %}
+
+{% block content %}
+{%- set me = config.extra.author_names or [config.title] %}
+{#- Optional: co-authors' names and their pages. -#}
+{%- set people = load_data(path=config.extra.authors or "data/authors.toml", required=false) or {} %}
+{%- set bib = load_data(path=config.extra.publications or "data/publications.bib", format="bibtex") %}
+{%- set entries = bib.bibliographies %}
+{%- set years = [e.tags.year for e in entries] | unique | sort | reverse %}
+{%- set marks = false %}
+{%- for e in entries %}{% if e.tags.author is containing(pat="*") %}{% set_global marks = true %}{% endif %}{% endfor %}
+<article>
+<h1>{{ page.title }}</h1>
+{{ page.content | safe }}
+{%- if marks %}
+<p class="pub-legend">{{ config.extra.equal_note or "* equal contribution" }}</p>
+{%- endif %}
+{%- for year in years %}
+
+<section>
+  <h2 class="pub-year no-number" id="y{{ year }}">{{ year }}</h2>
+  <ol class="pubs no-thumbs">
+{%- for e in entries %}
+{%- if e.tags.year == year %}
+{{ <cr.pub entry={e} people={people} me={me} full={true} initials={config.extra.author_initials or false} /> }}
+{%- endif %}
+{%- endfor %}
+  </ol>
+</section>
+{%- endfor %}
+</article>
+{% endblock content %}

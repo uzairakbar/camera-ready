@@ -1,0 +1,76 @@
+# Example site for the Camera Ready theme. Everything in it is fictional.
+#
+# To start your own site from this file, see "Quick start" in the README.
+# Two lines differ between this demo and a site that installs the theme;
+# both are marked "YOUR SITE".
+
+base_url = "https://uzairakbar.github.io/camera-ready"
+title = "Mira Castellane"
+description = "Mira Castellane is a (fictional) statistician working on causal inference. Example site for the Camera Ready theme for Zola."
+default_language = "en"
+# YOUR SITE: uncomment the next line.
+# theme = "camera-ready"
+author = "Mira Castellane"
+
+generate_feeds = true
+feed_filenames = ["atom.xml"]
+
+# Lets notes carry tags: [taxonomies] tags = ["..."] in a post's front matter.
+taxonomies = [{ name = "tags" }]
+
+[markdown]
+smart_punctuation = true
+definition_list = true
+# false: footnotes sit in the margin beside the text. true: at the page end.
+bottom_footnotes = false
+
+[markdown.highlighting]
+style = "class"
+light_theme = "camera-ready-light"
+dark_theme = "camera-ready-dark"
+# YOUR SITE: prefix both paths with themes/camera-ready/
+extra_themes = ["syntax/camera-ready-light.json", "syntax/camera-ready-dark.json"]
+error_on_missing_language = true
+
+[link_checker]
+internal_level = "error"
+external_level = "warn"
+
+[extra]
+# Both off by default; switched on here so the demo shows them.
+search = true
+search_shortcut = true
+scheme_toggle = true
+# With more papers than this the homepage shows only the `selected` ones and
+# links to the papers page. The default is 20; the example has six papers, so
+# it is set low here to show that behaviour.
+papers_limit = 4
+subtitle = "Statistics, University of Northmoor"
+menu = [
+  { name = "papers", url = "@/papers.md" },
+  { name = "notes", url = "@/notes/_index.md" },
+  { name = "kitchen sink", url = "@/kitchen-sink/index.md" },
+]
+# Shown after the menu. With `icon` the link is an icon; without, its name.
+links = [
+  { name = "Email", url = "mailto:mira@example.org", icon = "email" },
+  { name = "Google Scholar", url = "https://example.org/scholar", icon = "scholar" },
+  { name = "GitHub", url = "https://example.org/github", icon = "github" },
+]
+photo = "img/portrait.png"
+photo_alt = "Line drawing of a person in front of a chalkboard"
+author_names = ["Mira Castellane"]
+home_sections = ["news", "selected", "projects"]
+publications = "data/publications.bib"
+news = "data/news.toml"
+projects = "data/projects.toml"
+papers_page = "@/papers.md"
+news_visible = 4
+news_recent_days = 90
+accent = "#0a7d55"
+accent_dark = "#58d0a3"
+color_scheme = "auto"
+font = "latin-modern"
+justify = false
+indent_paragraphs = false
+numbered_headings = false

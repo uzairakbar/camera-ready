@@ -1,0 +1,27 @@
+# One [[projects]] block per item, shown in this order. Only `name` is
+# required. A card links to `url`; `links` appear only with
+# projects_style = "rows". `text` is markdown; `thumbnail` is an image path, as for publications;
+# `thumbnail_hover` is a second image shown while the row is hovered;
+# `dark_invert = true` inverts a dark-on-white thumbnail in dark mode.
+
+[[projects]]
+name = "ivkit"
+url = "https://example.org/ivkit"
+thumbnail = "img/ivkit.png"
+dark_invert = true
+thumbnail_hover = "img/weak.png"
+text = "A small Python library for instrumental-variable estimation with weak-instrument diagnostics built in. Used in three of the papers above."
+links = [
+  { name = "code", url = "https://example.org/ivkit" },
+  { name = "docs", url = "https://example.org/ivkit/docs" },
+]
+
+[[projects]]
+name = "Causal Inference Reading Group"
+url = "https://example.org/reading-group"
+thumbnail = "img/reading-group.png"
+dark_invert = true
+text = "A weekly reading group at Northmoor, open to all departments. We post the reading list and notes each term."
+links = [
+  { name = "schedule", url = "https://example.org/reading-group" },
+]

@@ -1,0 +1,177 @@
+{#- Site-wide settings, each with a default so the theme also works when a
+    key is missing from the site config. -#}
+{%- set scheme = config.extra.color_scheme or "auto" -%}
+{%- set font = config.extra.font or "latin-modern" -%}
+{%- set accent = config.extra.accent or "#0a7d55" -%}
+{%- set accent_dark = config.extra.accent_dark or "#58d0a3" -%}
+{%- set menu = config.extra.menu or [] -%}
+{%- set links = config.extra.links or [] -%}
+{%- set links_position = config.extra.links_position or "footer" -%}
+{%- if links_position != "footer" and links_position != "header" -%}
+  {{ throw(message="camera-ready: extra.links_position must be \"footer\" or \"header\"") }}
+{%- endif -%}
+{#- The light/dark button only makes sense when the site follows the system. -#}
+{%- set toggle = config.extra.scheme_toggle and scheme == "auto" -%}
+{%- set search = config.extra.search or false -%}
+{%- set search_site = config.extra.search_site or config.base_url | regex_replace(pattern="^https?://", rep="") | regex_replace(pattern="/+$", rep="") -%}
+{%- set hl = config.markdown.highlighting -%}
+{%- if scheme != "auto" and scheme != "light" and scheme != "dark" -%}
+  {{ throw(message="camera-ready: extra.color_scheme must be \"auto\", \"light\" or \"dark\", got \"" ~ scheme ~ "\"") }}
+{%- endif -%}
+{%- if font != "latin-modern" and font != "libertinus" -%}
+  {{ throw(message="camera-ready: extra.font must be \"latin-modern\" or \"libertinus\", got \"" ~ font ~ "\"") }}
+{%- endif -%}
+{%- set lang_css = ["cs", "da", "de", "es", "fr", "hu", "it", "ja", "ka", "ko", "mwl", "nl", "pl", "pt", "ro", "ru", "si", "sl", "sv", "tr", "zh-hans", "zh-hant"] -%}
+{%- set lang_key = lang | lower -%}
+<!DOCTYPE html>
+<html lang="{{ lang }}" class="scheme-{{ scheme }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+  <meta name="description" content="{% block description %}{{ config.description or config.title }}{% endblock description %}">
+  <meta name="generator" content="Zola, Camera Ready theme">
+  <link rel="preload" href="{{ get_url(path='latex.css/fonts/' ~ ('Libertinus' if font == 'libertinus' else 'LM') ~ '-regular.woff2') }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ get_url(path='latex.css/style.css') }}">
+{%- if lang_key in lang_css %}
+  <link rel="stylesheet" href="{{ get_url(path='latex.css/lang/' ~ lang_key ~ '.css') }}">
+{%- endif %}
+  <link rel="stylesheet" href="{{ get_url(path='camera-ready.css', cachebust=true) }}">
+{%- if hl and hl.style == "class" %}
+{%- if hl.light_theme and hl.dark_theme %}
+{%- if scheme != "dark" %}
+  <link rel="stylesheet" href="{{ get_url(path='giallo-light.css') }}"{% if scheme == "auto" %} media="(prefers-color-scheme: light), print"{% endif %}>
+{%- endif %}
+{%- if scheme != "light" %}
+  <link rel="stylesheet" href="{{ get_url(path='giallo-dark.css') }}"{% if scheme == "auto" %} media="screen and (prefers-color-scheme: dark)"{% endif %}>
+{%- endif %}
+{%- elif hl.theme %}
+  <link rel="stylesheet" href="{{ get_url(path='giallo.css') }}">
+{%- endif %}
+{%- endif %}
+  <style>:root { --accent-light: {{ accent }}; --accent-dark: {{ accent_dark }}; --note-light: {{ config.extra.note_color or "#b3127a" }}; --note-dark: {{ config.extra.note_color_dark or "#f58ad0" }}; }</style>
+{%- if config.generate_feeds %}
+{%- for feed in config.feed_filenames %}
+  <link rel="alternate" type="{% if feed is ending_with(pat='atom.xml') %}application/atom+xml{% else %}application/rss+xml{% endif %}" title="{{ config.title }}" href="{{ get_url(path=feed) }}">
+{%- endfor %}
+{%- endif %}
+{%- if config.extra.favicon %}
+  <link rel="icon" href="{{ get_url(path=config.extra.favicon) }}">
+{%- endif %}
+{% block math %}{% endblock math %}
+{%- block head %}{% endblock head %}
+</head>
+<body class="{% if scheme == 'auto' %}latex-dark-auto{% elif scheme == 'dark' %}latex-dark{% endif %}{% if font == 'libertinus' %} libertinus{% endif %}{% if config.extra.justify %} text-justify{% endif %}{% if config.extra.numbered_headings %} numbered-headings{% endif %}">
+
+{%- if toggle %}
+{#- The one script in the theme, and only with `scheme_toggle = true`. It
+    runs before the page is painted so a remembered choice does not flash.
+    Without JavaScript the button stays hidden and the page follows the
+    system setting, exactly as it does with the option off. #}
+<script>
+(function () {
+  var root = document.documentElement, body = document.body, key = 'camera-ready-scheme';
+  function isDark() {
+    return body.classList.contains('latex-dark') ||
+      (body.classList.contains('latex-dark-auto') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function apply(scheme) {
+    root.className = root.className.replace(/scheme-[a-z]+/, 'scheme-' + scheme);
+    body.classList.remove('latex-dark-auto');
+    body.classList.toggle('latex-dark', scheme === 'dark');
+    var light = document.querySelector('link[href*="giallo-light.css"]');
+    var dark = document.querySelector('link[href*="giallo-dark.css"]');
+    if (light) light.media = scheme === 'light' ? 'all' : 'print';
+    if (dark) dark.media = scheme === 'dark' ? 'screen' : 'not all';
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(key); } catch (e) {}
+  if (saved === 'light' || saved === 'dark') apply(saved);
+  document.addEventListener('DOMContentLoaded', function () {
+    var button = document.querySelector('.scheme-toggle');
+    if (!button) return;
+    button.hidden = false;
+    button.addEventListener('click', function () {
+      var next = isDark() ? 'light' : 'dark';
+      apply(next);
+      try { localStorage.setItem(key, next); } catch (e) {}
+    });
+  });
+})();
+</script>
+{%- endif %}
+
+<header class="site-header">
+  <div class="site-brand">
+    <a class="site-title" href="{{ get_url(path='/', lang=lang) }}">{{ config.title }}</a>
+{%- if config.extra.subtitle %}
+    <p class="site-subtitle">{{ config.extra.subtitle | markdown(inline=true) | safe }}</p>
+{%- endif %}
+  </div>
+{%- if menu or search or toggle or (links and links_position == "header") %}
+  <nav class="site-nav" aria-label="Site">
+{%- for item in menu %}
+{%- set item_url = get_url(path=item.url, lang=lang) if item.url is starting_with(pat="@/") else <cr.href to={item.url} /> | trim %}
+    <a href="{{ item_url | safe }}"{% if current_url and current_url == item_url %} aria-current="page"{% endif %}>{{ item.name }}</a>
+{%- endfor %}
+{%- if links_position == "header" %}
+{{ <cr.linkicons links={links} /> }}
+{%- endif %}
+{%- if search or toggle %}
+    <span class="site-tools">
+{%- endif %}
+{%- if search %}
+{#- A plain form that hands the query to DuckDuckGo, limited to this site.
+    Nothing is loaded from there; the visitor only goes there on submit. #}
+    <form class="site-search" role="search" action="https://duckduckgo.com/" method="get">
+      <input type="hidden" name="sites" value="{{ search_site }}">
+      <label class="visually-hidden" for="site-search">{{ config.extra.headings?.search or "Search this site" }}</label>
+      <input id="site-search" type="search" name="q" placeholder="{{ config.extra.headings?.search_placeholder or "search" }}"{% if config.extra.search_shortcut %} title="Press / to search"{% endif %} required>
+    </form>
+{%- if config.extra.search_shortcut %}
+{#- Optional: pressing "/" anywhere outside a text field moves to the search
+    field. The field works the same without it. #}
+    <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+      var t = e.target, tag = t && t.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
+      var box = document.getElementById('site-search');
+      if (!box) return;
+      e.preventDefault();
+      box.focus();
+    });
+    </script>
+{%- endif %}
+{%- endif %}
+{%- if toggle %}
+    <button class="scheme-toggle" type="button" hidden title="{{ config.extra.headings?.toggle or "Switch between light and dark" }}" aria-label="{{ config.extra.headings?.toggle or "Switch between light and dark" }}"><svg class="icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" stroke-width="1.5"/><path fill="currentColor" d="M8 1.25a6.75 6.75 0 0 1 0 13.5z"/></svg></button>
+{%- endif %}
+{%- if search or toggle %}
+    </span>
+{%- endif %}
+  </nav>
+{%- endif %}
+</header>
+
+<main>
+{% block content %}{% endblock content %}
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer-row">
+{%- if config.extra.footer %}
+    <p>{{ config.extra.footer | markdown(inline=true) | safe }}</p>
+{%- else %}
+    <p>&copy; {{ now() | date(format="%Y") }} {{ config.title }}. Typeset with <a href="https://github.com/uzairakbar/camera-ready">Camera Ready</a>.</p>
+{%- endif %}
+{%- if links and links_position == "footer" %}
+    <nav class="site-links" aria-label="Elsewhere">
+{{ <cr.linkicons links={links} /> }}
+    </nav>
+{%- endif %}
+  </div>
+</footer>
+
+</body>
+</html>

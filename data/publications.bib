@@ -1,0 +1,110 @@
+% Publications, newest first. Any BibTeX file works; these extra fields are
+% understood by the theme and all are optional:
+%
+%   selected  = {true}           keep on the homepage once the list is longer
+%                                than `papers_limit`
+%   thumbnail = {img/x.png}      image in content/ or static/, shown beside it
+%   thumbnail_hover = {img/y.gif}  second image, shown while hovering
+%   dark_invert = {true}         the thumbnail is dark ink on white: invert
+%                                it in dark mode
+%   blurb     = {One sentence.}  short description under the entry
+%   abbr      = {NeurIPS}        short venue name, shown as a tag on the homepage
+%   note      = {Oral}           a second tag after the venue
+%   status    = {In submission}  a grey tag after the venue
+%   highlight = {true}           tint the row
+%   pdf, arxiv, doi, code, data, slides, poster, video, talk, website, bibtex
+%                                links; a URL, or the path of a file in static/
+%   links     = {pdf, bibtex}    show only these links for this entry
+%
+% Mark equal contribution with an asterisk after a name: {Castellane*, Mira}.
+% These entries are invented for the demo.
+
+@article{castellane2026weak,
+  status    = {To appear},
+  abbr      = {JMLR},
+  title     = {Weak Instruments, Strong Guarantees: Anderson--Rubin Inference in High Dimensions},
+  author    = {Castellane, Mira and Wren, Tobias and Adeyemi, Yusuf},
+  journal   = {Journal of Machine Learning Research},
+  year      = {2026},
+  selected  = {true},
+  thumbnail = {img/weak.png},
+  dark_invert = {true},
+  blurb     = {Confidence sets that keep their coverage when instruments are many and weak, at a cost of $O(\sqrt{k/n})$ in width.},
+  pdf       = {https://example.org/weak.pdf},
+  arxiv     = {2601.00001},
+  code      = {https://example.org/ivkit}
+}
+
+@inproceedings{castellane2026invariant,
+  abbr      = {NeurIPS},
+  title     = {Invariant Risk Is Not Enough: Identifying Causal Features with a Single Environment Shift},
+  author    = {Castellane*, Mira and Raman*, Priya and M{\"u}ller, Jonas},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  note      = {Oral},
+  highlight = {true},
+  selected  = {true},
+  thumbnail = {img/invariant.png},
+  dark_invert = {true},
+  blurb     = {One well-chosen shift identifies what many arbitrary ones cannot.},
+  pdf       = {https://example.org/invariant.pdf},
+  arxiv     = {2605.00002},
+  code      = {https://example.org/invariant},
+  slides    = {https://example.org/invariant-slides.pdf}
+}
+
+@inproceedings{okafor2026proximal,
+  abbr      = {NeurIPS},
+  title     = {Proximal Causal Learning without Completeness},
+  author    = {Okafor, Lena and Castellane, Mira},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2026},
+  pdf       = {https://example.org/proximal.pdf},
+  arxiv     = {2605.00003}
+}
+
+@inproceedings{castellane2025double,
+  abbr      = {ICML},
+  title     = {Double Descent in Two-Stage Least Squares},
+  author    = {Castellane, Mira and Adeyemi, Yusuf},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2025},
+  selected  = {true},
+  thumbnail = {img/descent.png},
+  dark_invert = {true},
+  blurb     = {The first stage interpolates, the second stage pays for it, and then (surprisingly) stops paying.},
+  pdf       = {https://example.org/descent.pdf},
+  code      = {https://example.org/descent},
+  poster    = {https://example.org/descent-poster.pdf}
+}
+
+@phdthesis{castellane2025thesis,
+  title     = {Identification under Imperfect Instruments},
+  author    = {Castellane, Mira},
+  school    = {Port Ellery University},
+  year      = {2025},
+  pdf       = {https://example.org/thesis.pdf}
+}
+
+@inproceedings{wren2024sensitivity,
+  abbr      = {UAI},
+  title     = {A Sensitivity Analysis for the Exclusion Restriction},
+  author    = {Wren, Tobias and Castellane, Mira and Halloran, Sof{\'i}a},
+  booktitle = {Conference on Uncertainty in Artificial Intelligence (UAI)},
+  year      = {2024},
+  selected  = {true},
+  thumbnail = {img/sensitivity.png},
+  dark_invert = {true},
+  blurb     = {How wrong can the exclusion restriction be before the conclusion flips? A single interpretable parameter answers.},
+  pdf       = {https://example.org/sensitivity.pdf},
+  doi       = {10.0000/example.2024.001}
+}
+
+@inproceedings{castellane2023bounds,
+  abbr      = {AISTATS},
+  title     = {Sharp Bounds on $\beta$ When the Instrument Is Only Approximately Valid},
+  author    = {Castellane, Mira and Wren, Tobias},
+  booktitle = {International Conference on Artificial Intelligence and Statistics (AISTATS)},
+  year      = {2023},
+  pdf       = {https://example.org/bounds.pdf}
+}

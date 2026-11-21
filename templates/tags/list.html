@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ config.extra.headings?.tags_title or "Tags" }} · {{ config.title }}{% endblock title %}
+
+{% block content %}
+<article>
+<h1>{{ config.extra.headings?.tags_title or "Tags" }}</h1>
+<ol class="toc-list">
+{%- for term in terms %}
+  <li><div class="toc-entry"><a href="{{ term.permalink }}">{{ term.name }}</a><span class="toc-count">{{ term.page_count }}</span></div></li>
+{%- endfor %}
+</ol>
+</article>
+{% endblock content %}

@@ -1,0 +1,1616 @@
+/*
+ * Camera Ready: a layer on top of an unmodified LaTeX.css (static/latex.css).
+ *
+ * Everything LaTeX.css already styles is left alone. This file adds only what
+ * an academic homepage needs on top of it: an accent colour, a running head,
+ * publication rows, a news list, margin footnotes and a few extra theorem
+ * environments. Plain CSS, no build step. Edit it by hand if you need to.
+ */
+
+/* ------------------------------------------------------------------ *
+ * 1. Tokens
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Overridden from the site config by a <style> tag in the page head. */
+  --accent-light: #0a7d55;
+  --accent-dark: #58d0a3;
+  --accent: var(--accent-light);
+  /* A second colour, used only for the note tag ("Oral", "Spotlight"). */
+  --note-light: #b3127a;
+  --note-dark: #f58ad0;
+  --note: var(--note-light);
+  --new-bg: #ffd60a;
+  --new-fg: #1a1a1a;
+
+  --muted-color: hsl(0, 3%, 30%);
+  --rule-color: hsl(0, 0%, 39%);
+  --thumb-bg-color: hsl(210, 20%, 94%);
+  --hairline-color: hsl(210, 12%, 86%);
+  --thumb-filter: none;
+
+  /* Margin notes. LaTeX.css uses 18vw + a 2vw gap; these clamp that so a
+     note never runs off a screen that is only just wide enough. */
+  --note-width: min(18vw, calc(50vw - 40ch - 4.5rem));
+  --note-gap: 2vw;
+}
+
+html.scheme-auto { color-scheme: light dark; }
+html.scheme-light { color-scheme: light; }
+html.scheme-dark { color-scheme: dark; }
+
+.latex-dark {
+  --accent: var(--accent-dark);
+  --note: var(--note-dark);
+  --muted-color: hsl(0, 0%, 72%);
+  --rule-color: hsl(0, 0%, 59%);
+  --thumb-bg-color: hsl(0, 0%, 22%);
+  --hairline-color: hsl(0, 0%, 28%);
+  --thumb-filter: brightness(0.92);
+}
+
+@media (prefers-color-scheme: dark) {
+  .latex-dark-auto {
+    --accent: var(--accent-dark);
+    --note: var(--note-dark);
+    --muted-color: hsl(0, 0%, 72%);
+    --rule-color: hsl(0, 0%, 59%);
+    --thumb-bg-color: hsl(0, 0%, 22%);
+    --hairline-color: hsl(0, 0%, 28%);
+    --thumb-filter: brightness(0.92);
+  }
+}
+
+/* `dark_invert`: for figures drawn in dark ink on a white page. In dark
+   mode the lightness is inverted and the hue turned back, so lines become
+   light and colours keep their names (red stays red). The idea is from
+   Alexander Terenin's academic-paper theme. Inverting by 84% turns white
+   into the 16% grey of the LaTeX.css dark background. */
+.latex-dark .dark-invert {
+  filter: invert(0.84) hue-rotate(180deg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .latex-dark-auto .dark-invert {
+    filter: invert(0.84) hue-rotate(180deg);
+  }
+}
+
+/* LaTeX.css colours links through --link-visited. Point it at the accent in
+   every mode; the rest of its palette is untouched. */
+body,
+body.latex-dark,
+body.latex-dark-auto {
+  --link-visited: var(--accent);
+}
+
+/* ------------------------------------------------------------------ *
+ * 2. Base adjustments
+ * ------------------------------------------------------------------ */
+
+/* Latin Modern is light on screens, so set it a little larger than the
+   browser default. Everything in LaTeX.css is in rem/ch and scales with it. */
+html {
+  font-size: 106.25%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  /* Figures and tables are numbered through the page, not per parent. */
+  counter-reset: cr-table figcaption caption;
+  flex: 1 0 auto;
+  /* Margin notes hang outside the column; the body clips the x-axis. */
+  min-width: 0;
+}
+
+a {
+  text-decoration-thickness: 0.04em;
+  text-underline-offset: 0.16em;
+}
+
+a:hover {
+  text-decoration-thickness: 0.09em;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule-color);
+  margin: 2rem auto;
+  width: 40%;
+}
+
+blockquote {
+  margin: 1rem 0 1rem 1.5rem;
+  padding: 0 0 0 1rem;
+  border-left: 2px solid var(--rule-color);
+  font-style: italic;
+}
+
+mark {
+  background: hsl(52, 95%, 78%);
+  color: hsl(0, 5%, 10%);
+  padding: 0 0.15em;
+}
+
+.small-caps {
+  font-variant-caps: small-caps;
+}
+
+/* LaTeX.css centres the first <h1>; every page title here is one. */
+main > h1,
+article > h1 {
+  text-align: center;
+  text-wrap: balance;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* Headings can be link targets; keep them clear of the top edge. */
+:target {
+  scroll-margin-top: 1.5rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3. Running head and footer
+ * ------------------------------------------------------------------ */
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 2rem;
+  line-height: 1.4;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.site-title,
+.site-title:visited {
+  color: var(--body-color);
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.site-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted-color);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.15rem;
+  margin-left: auto;
+}
+
+.site-nav a,
+.site-nav a:visited {
+  color: var(--muted-color);
+  text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current] {
+  color: var(--accent);
+}
+
+.site-icon {
+  display: inline-flex;
+  padding: 0.15rem 0;
+}
+
+.icon {
+  width: 1.05em;
+  height: 1.05em;
+}
+
+.site-footer {
+  flex-shrink: 0;
+  margin-top: 4rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted-color);
+}
+
+/* The short rule LaTeX puts above footnotes. */
+.site-footer::before {
+  content: '';
+  display: block;
+  width: 30%;
+  margin-bottom: 0.6rem;
+  border-top: 1px solid var(--rule-color);
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+}
+
+.site-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  margin-left: auto;
+  font-size: 1rem;
+}
+
+.site-links a,
+.site-links a:visited {
+  color: var(--muted-color);
+  text-decoration: none;
+}
+
+.site-links a:hover {
+  color: var(--accent);
+}
+
+/* Header search: a short underlined field. */
+.site-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.95rem;
+}
+
+.site-search {
+  display: inline-flex;
+}
+
+.site-search input[type='search'] {
+  width: 6.5rem;
+  padding: 0.05rem 0.1rem;
+  border: 0;
+  border-bottom: 1px solid var(--rule-color);
+  border-radius: 0;
+  background: transparent;
+  color: var(--body-color);
+  font: inherit;
+  line-height: 1.3;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: width 0.15s;
+}
+
+.site-search input[type='search']::placeholder {
+  color: var(--muted-color);
+  opacity: 0.8;
+}
+
+.site-search input[type='search']:focus {
+  width: 9rem;
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+/* Light/dark button. Hidden in the markup; its script reveals it. */
+.scheme-toggle {
+  display: inline-flex;
+  padding: 0.15rem 0;
+  border: 0;
+  background: none;
+  color: var(--muted-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.scheme-toggle[hidden] {
+  display: none;
+}
+
+.scheme-toggle:hover {
+  color: var(--accent);
+}
+
+/* Links under the bio, as words: Email / Scholar / GitHub. */
+.bio-links {
+  text-align: center;
+  hyphens: none;
+}
+
+.bio-links a {
+  text-decoration: none;
+}
+
+.bio-links a:hover {
+  text-decoration: underline;
+}
+
+/* The slash is glued to the link before it, so a line never starts with one. */
+.bio-links a {
+  white-space: nowrap;
+}
+
+.bio-links a:not(:last-child)::after {
+  content: '\00a0/';
+  color: var(--muted-color);
+}
+
+.bio-links a + a {
+  margin-left: 0.1em;
+}
+
+/* ------------------------------------------------------------------ *
+ * 4. Title block (homepage and posts)
+ * ------------------------------------------------------------------ */
+
+.title-block {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title-block h1 {
+  margin-bottom: 0.6rem;
+  text-wrap: balance;
+}
+
+.title-block p {
+  margin: 0.2rem 0;
+}
+
+.title-block .author {
+  margin: 0.2rem 0;
+}
+
+.title-block .date {
+  font-size: 1rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * 5. Homepage: bio, news, publication rows
+ * ------------------------------------------------------------------ */
+
+/* The portrait floats, and is deliberately not cleared: with a short bio the
+   next section starts beside it instead of leaving a gap. */
+/* The homepage is a summary, not a paper: one step smaller and set tighter
+   than running text, in the same typeface. */
+.home {
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.home .bio p {
+  margin: 0 0 0.8em;
+}
+
+.bio > p:first-of-type {
+  margin-top: 0;
+}
+
+.portrait {
+  float: right;
+  width: 9.5rem;
+  max-width: 36%;
+  height: auto;
+  margin: 0.3rem 0 1rem 1.5rem;
+  border-radius: 6px;
+  filter: var(--thumb-filter);
+}
+
+/* `photo_position = "margin"`: on screens wide enough for margin notes the
+   portrait hangs in the right margin, outside the text column, by the same
+   float-and-negative-margin trick LaTeX.css uses for sidenotes. Narrower
+   screens keep it inside the column, as above. */
+@media (min-width: 1051px) {
+  .portrait-margin {
+    --portrait-width: min(10rem, var(--note-width));
+    width: var(--portrait-width);
+    max-width: none;
+    margin: 0.3rem calc(-1 * (var(--portrait-width) + var(--note-gap))) 1rem 0;
+  }
+}
+
+/* Homepage section headings are smaller than in an article: the page is a
+   summary, not a paper. */
+.home h2 {
+  margin-top: 2rem;
+  margin-bottom: 0.4rem;
+  font-size: 1.22em;
+  line-height: 1.4;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.section-more {
+  font-size: 0.95em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.section-more:hover {
+  text-decoration: underline;
+}
+
+/* News: a date column and a text column. */
+.news {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.97em;
+  line-height: 1.45;
+}
+
+.news li {
+  display: grid;
+  grid-template-columns: 3.9em 1fr;
+  gap: 0 0.6em;
+  margin-top: 0.25em;
+}
+
+.news time {
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  white-space: nowrap;
+  hyphens: none;
+}
+
+.news-older {
+  margin-top: 0.4rem;
+}
+
+.news-older summary {
+  cursor: pointer;
+  width: fit-content;
+  font-size: 0.9rem;
+  color: var(--muted-color);
+  list-style: none;
+}
+
+.news-older summary::-webkit-details-marker {
+  display: none;
+}
+
+.news-older summary::before {
+  content: '\2193\00a0';
+}
+
+.news-older[open] summary::before {
+  content: '\2191\00a0';
+}
+
+.news-older summary:hover {
+  color: var(--accent);
+}
+
+/* The "NEW!" badge: pixel-art letters on yellow blocks that hop one pixel at
+   a time, four frames at 0.2s like an old animated GIF. One SVG unit is one
+   pixel of the drawing. */
+.new {
+  width: 2.64em;
+  height: 1.1em;
+  margin-left: 0.3em;
+  vertical-align: -0.12em;
+}
+
+/* The GIF version of the badge. Its SVG twin sits right after it and takes
+   over only for visitors who ask for reduced motion. */
+.new-gif {
+  display: inline-block;
+  /* 40px wide, as on the site it came from, and scaled smoothly: at this
+     size nearest-neighbour scaling makes the pixels uneven. */
+  width: 40px;
+  height: auto;
+  margin-left: 0.25em;
+  vertical-align: -0.1em;
+}
+
+.new-gif + .new {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new-gif {
+    display: none;
+  }
+
+  .new-gif + .new {
+    display: inline;
+  }
+}
+
+.new rect { fill: var(--new-bg); }
+.new path { fill: var(--new-fg); }
+.new g { animation: 0.8s steps(1, end) infinite; }
+.new .new-n { animation-name: cr-new-n; }
+.new .new-e { animation-name: cr-new-e; }
+.new .new-w { animation-name: cr-new-w; }
+.new .new-x { animation-name: cr-new-x; }
+
+@keyframes cr-new-n {
+  0%, 50% { transform: translateY(1px); }
+  25%, 75% { transform: translateY(0); }
+}
+
+@keyframes cr-new-e {
+  0% { transform: translateY(2px); }
+  25% { transform: translateY(-1px); }
+  50%, 75% { transform: translateY(1px); }
+}
+
+@keyframes cr-new-w {
+  0% { transform: translateY(1px); }
+  25%, 75% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+@keyframes cr-new-x {
+  0%, 50% { transform: translateY(-1px); }
+  25% { transform: translateY(0); }
+  75% { transform: translateY(1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .new g {
+    animation: none;
+  }
+}
+
+/* Publication and project rows: optional thumbnail beside the text, a
+   hairline between rows. */
+.pubs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pub {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 0 1.15rem;
+  align-items: start;
+  padding: 0.95rem 0;
+  font-size: 0.97em;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.pub + .pub {
+  border-top: 1px solid var(--hairline-color);
+}
+
+/* `highlight = {true}` in the .bib file tints a row. */
+.pub-highlight {
+  margin: 0 -0.8rem;
+  padding: 0.95rem 0.8rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Two tinted rows in a row stay two rows. */
+.pub-highlight + .pub-highlight {
+  margin-top: 0.4rem;
+}
+
+.pub-highlight,
+.pub-highlight + .pub {
+  border-top-color: transparent;
+}
+
+.pubs.no-thumbs .pub {
+  grid-template-columns: 1fr;
+  padding: 0.6rem 0;
+}
+
+.pubs.no-thumbs .pub + .pub {
+  border-top: 0;
+}
+
+.pubs.no-thumbs .pub-highlight {
+  padding: 0.6rem 0.8rem;
+}
+
+.pubs.no-thumbs .pub-thumb {
+  display: none;
+}
+
+.pub-thumb {
+  position: relative;
+}
+
+/* In a list where any row has a thumbnail, every row keeps the column, so
+   the text lines up. A missing thumbnail is a visible gap to fill. */
+
+/* `thumbnail_hover`: a second image (often an animated GIF) laid over the
+   first and shown while the pointer is on the row. */
+.pub-thumb .thumb-hover {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.pub:hover .thumb-hover,
+.pub:focus-within .thumb-hover {
+  opacity: 1;
+}
+
+/* Thumbnails have no frame. In a row, the image is sized by the text beside
+   it: it takes no height of its own (it is positioned out of flow), so the
+   row is as tall as its text and the image is fitted inside that box. */
+.pub-thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: var(--thumb-filter);
+}
+
+.pubs .pub-thumb {
+  align-self: stretch;
+}
+
+.pubs .pub-thumb img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pub-body p {
+  margin: 0;
+  text-indent: 0;
+}
+
+/* Regular weight: Latin Modern's bold is wide and dark, and a list of bold
+   green titles reads as crowded. Size carries the emphasis instead. */
+.pub-title {
+  font-size: 1.1em;
+  font-weight: normal;
+  line-height: 1.3;
+  margin-bottom: 0.1em !important;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.pub-title a {
+  text-decoration: none;
+}
+
+.pub-title a:hover {
+  text-decoration: underline;
+}
+
+/* Your own name is underlined. Co-authors with a page are links that look
+   like plain text until hovered, when they take the same underline. */
+.pub-authors .me,
+.pub-authors a:hover,
+.pub-authors a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.18em;
+}
+
+.pub-authors a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pub-authors sup {
+  line-height: 0;
+}
+
+.pub-venue {
+  margin-top: 0.3rem !important;
+}
+
+/* A small label: the venue, or a note such as "Oral". */
+.tag {
+  display: inline-block;
+  padding: 0 0.4em;
+  border-radius: 3px;
+  font-size: 0.86em;
+  line-height: 1.5;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  hyphens: none;
+}
+
+/* `status`: a quiet grey tag, such as "In submission". */
+.tag-status {
+  font-weight: normal;
+  color: var(--muted-color);
+  background: color-mix(in srgb, var(--body-color) 9%, transparent);
+}
+
+.tag-note {
+  color: var(--note);
+  background: color-mix(in srgb, var(--note) 13%, transparent);
+}
+
+.pub-links {
+  margin-top: 0.25rem !important;
+  font-size: 0.9em;
+  hyphens: none;
+}
+
+.pub-links:empty {
+  display: none;
+}
+
+.pub-links a {
+  text-decoration: none;
+}
+
+/* Links are separated by slashes: pdf / arxiv / code. */
+.pub-links a + a::before {
+  content: '/';
+  display: inline-block;
+  margin: 0 0.45em;
+  color: var(--muted-color);
+}
+
+.pub-links a:hover {
+  text-decoration: underline;
+}
+
+.pub-blurb {
+  margin-top: 0.35rem !important;
+  font-size: 0.93em;
+  color: var(--muted-color);
+}
+
+.pub-legend {
+  margin: 0 0 0.25rem;
+  font-size: 0.86em;
+  color: var(--muted-color);
+}
+
+/* Project cards: image on top, title and text underneath. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1.1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline-color);
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 0.97em;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.card .pub-thumb img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-bottom: 1px solid var(--hairline-color);
+  background: #fff;
+}
+
+.card:hover .thumb-hover,
+.card:focus-within .thumb-hover {
+  opacity: 1;
+}
+
+/* The title link covers the whole card, so the card is one click target
+   with one link for keyboards and screen readers. */
+.card .pub-title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.card:has(.pub-title a):hover {
+  border-color: var(--accent);
+}
+
+.card-body {
+  padding: 0.6rem 0.75rem 0.7rem;
+}
+
+.card-body p {
+  margin: 0;
+  text-indent: 0;
+}
+
+.card-text {
+  margin-top: 0.2rem !important;
+  font-size: 0.93em;
+  color: var(--muted-color);
+}
+
+/* Year headings on the papers page. */
+.pub-year {
+  margin-top: 2rem;
+  margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * 6. Notes index: a table of contents with dotted leaders
+ * ------------------------------------------------------------------ */
+
+.toc-list {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-list li {
+  margin-top: 0.9rem;
+  line-height: 1.5;
+}
+
+.toc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.toc-entry a {
+  text-decoration: none;
+  font-weight: bold;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+.toc-entry a:hover {
+  text-decoration: underline;
+}
+
+.toc-entry::after {
+  content: '';
+  flex: 1 1 2rem;
+  order: 1;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted var(--muted-color);
+  transform: translateY(-0.25em);
+}
+
+.toc-entry time {
+  order: 2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--muted-color);
+}
+
+.toc-count {
+  order: 2;
+  color: var(--muted-color);
+}
+
+/* Tags: a "view by tag" row above a list of posts, and small links under
+   each entry and under a post's date. */
+.tag-row {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  hyphens: none;
+}
+
+.tag-row a {
+  margin-left: 0.3em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tag-row a:first-child {
+  margin-left: 0;
+}
+
+.tag-row a:hover,
+.tag-row a[aria-current] {
+  text-decoration: underline;
+}
+
+.tags a {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tags a::before {
+  content: '#';
+  opacity: 0.6;
+}
+
+.tags a + a {
+  margin-left: 0.6em;
+}
+
+.tags a:hover {
+  text-decoration: underline;
+}
+
+.toc-list .toc-tags {
+  margin: 0.05rem 0 0;
+  font-size: 0.85rem;
+}
+
+.post-tags {
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.toc-list .toc-summary {
+  margin: 0.1rem 0 0;
+  font-size: 0.92rem;
+  color: var(--muted-color);
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. Articles
+ * ------------------------------------------------------------------ */
+
+/* Optional per-page table of contents; LaTeX.css numbers `nav ol`. */
+.toc {
+  margin: 2rem 0;
+}
+
+.toc h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.toc ol {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.toc a {
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+/* Numbered section headings, switched on from the config. */
+.numbered-headings article {
+  counter-reset: cr-h2;
+}
+
+.numbered-headings article h2:not(.no-number) {
+  counter-increment: cr-h2;
+  counter-reset: cr-h3;
+}
+
+.numbered-headings article h3:not(.no-number) {
+  counter-increment: cr-h3;
+  counter-reset: cr-h4;
+}
+
+.numbered-headings article h4:not(.no-number) {
+  counter-increment: cr-h4;
+}
+
+.numbered-headings article h2:not(.no-number)::before {
+  content: counter(cr-h2);
+  margin-right: 1.1rem;
+}
+
+.numbered-headings article h3:not(.no-number)::before {
+  content: counter(cr-h2) '.' counter(cr-h3);
+  margin-right: 1rem;
+}
+
+.numbered-headings article h4:not(.no-number)::before {
+  content: counter(cr-h2) '.' counter(cr-h3) '.' counter(cr-h4);
+  margin-right: 0.9rem;
+}
+
+/* The abstract heading is never numbered. */
+.numbered-headings article .abstract h2::before,
+.numbered-headings article .toc h2::before {
+  content: none;
+}
+
+.abstract {
+  max-width: 62ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.abstract p {
+  text-align: justify;
+  margin-top: 0.6rem;
+}
+
+/* Figures and captions */
+figure {
+  margin: 1.75rem 0;
+}
+
+figure img {
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+figcaption {
+  margin-top: 0.4rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Captioned tables from the table component. The caption goes above, as
+   in a paper. Set --table-label to translate the word. */
+.table-figure {
+  margin: 1.75rem 0;
+}
+
+.table-caption {
+  counter-increment: cr-table;
+  margin: 0 0 0.5rem;
+  padding: 0 0.25em;
+  font-size: 0.923em;
+  line-height: 1.5;
+  text-align: center;
+  text-indent: 0 !important;
+}
+
+.table-caption::before {
+  content: var(--table-label, 'Table') ' ' counter(cr-table) '. ';
+  font-weight: bold;
+}
+
+/* Tables: centred, and scrolling sideways instead of breaking the page. */
+article table:not(.borders-custom),
+article table.borders-custom,
+.table-figure table:not(.borders-custom) {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.5rem auto;
+  overflow-x: auto;
+}
+
+.table-figure table:not(.borders-custom) {
+  margin-top: 0;
+}
+
+article th {
+  font-weight: bold;
+}
+
+/* Table cells never hyphenate: "low-er" in a narrow column reads badly. */
+article th,
+article td {
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* Zola writes markdown column alignment as inline styles, so `:--`, `:-:`
+   and `--:` already work. LaTeX.css rules key off th[scope]; markdown tables
+   have none, so draw the header rule here. */
+article thead th {
+  border-bottom: var(--border-width-thin) solid var(--table-border-color);
+}
+
+article table:not(.borders-custom) > tbody > tr:first-child > td {
+  border-top: 0;
+}
+
+/* Border presets for the table component. */
+.table-plain table {
+  border: 0 !important;
+}
+
+.table-plain th,
+.table-plain td {
+  border: 0 !important;
+}
+
+.table-grid table {
+  border: 0 !important;
+  border-collapse: collapse;
+}
+
+.table-grid th,
+.table-grid td {
+  border: var(--border-width-thin) solid var(--table-border-color) !important;
+}
+
+/* Code */
+pre {
+  margin: 1.25rem 0;
+  line-height: 1.5;
+  tab-size: 4;
+}
+
+pre code[data-name]::before {
+  content: attr(data-name);
+  float: right;
+  margin-left: 1rem;
+  font-size: 0.85em;
+  opacity: 0.65;
+}
+
+:not(pre) > code {
+  hyphens: none;
+  overflow-wrap: anywhere;
+}
+
+/* Required by Zola's highlighter. */
+.giallo-l {
+  display: inline-block;
+  min-height: 1lh;
+  width: 100%;
+}
+
+.giallo-ln {
+  display: inline-block;
+  user-select: none;
+  margin-right: 0.6em;
+  min-width: 2ch;
+  text-align: right;
+  opacity: 0.55;
+}
+
+/* Maths. KaTeX's fonts are Computer Modern, the same design as the body
+   text, so set them at the same size. */
+body .katex {
+  font-size: 1em;
+}
+
+.katex-display {
+  margin: 1.1em 0;
+  padding: 0.15em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* A display wider than the column scrolls as a whole. Without this its box
+   stays column-wide, the formula spills out of it, and an equation number
+   lands on top of the formula. Numbered displays also keep room for the
+   number on both sides, which keeps the formula centred. */
+.katex-display > .katex > .katex-html {
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+}
+
+.katex-display > .katex > .katex-html:has(> .katex-tag),
+.katex-display > .katex > .katex-html:has(> .tag) {
+  padding: 0 2.6em;
+}
+
+/* Before KaTeX runs (or without it) maths shows as its TeX source. */
+p > code:only-child {
+  white-space: pre-wrap;
+}
+
+/* ------------------------------------------------------------------ *
+ * 8. Theorem-like environments
+ * ------------------------------------------------------------------ */
+
+/* The label is a ::before on the block; run the first paragraph in after it. */
+.theorem > p:first-of-type,
+.lemma > p:first-of-type,
+.proposition > p:first-of-type,
+.corollary > p:first-of-type,
+.definition > p:first-of-type,
+.example > p:first-of-type,
+.remark > p:first-of-type,
+.proof > p:first-of-type {
+  display: inline;
+}
+
+.theorem,
+.lemma,
+.proposition,
+.corollary,
+.definition,
+.example,
+.remark,
+.proof {
+  margin: 1.25rem 0;
+}
+
+.env-name {
+  font-style: normal;
+}
+
+.env-name::after {
+  content: ' ';
+}
+
+/* LaTeX.css ships theorem, lemma, definition and proof. These four follow
+   the amsthm conventions: plain style for results, definition style for the
+   rest, all sharing the theorem counter. */
+.proposition,
+.corollary {
+  counter-increment: theorem;
+  display: block;
+  font-style: italic;
+}
+
+.example,
+.remark {
+  display: block;
+  font-style: normal;
+}
+
+.example {
+  counter-increment: theorem;
+}
+
+.proposition::before {
+  content: 'Proposition ' counter(theorem) '. ';
+  font-weight: bold;
+  font-style: normal;
+}
+
+.corollary::before {
+  content: 'Corollary ' counter(theorem) '. ';
+  font-weight: bold;
+  font-style: normal;
+}
+
+.example::before {
+  content: 'Example ' counter(theorem) '. ';
+  font-weight: bold;
+}
+
+.remark::before {
+  content: 'Remark. ';
+  font-style: italic;
+}
+
+/* Keep the QED square inside the column so it is never clipped. */
+.proof::after {
+  right: 0;
+  bottom: 0;
+}
+
+.proof > p:last-of-type {
+  padding-right: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * 9. Margin notes
+ * ------------------------------------------------------------------ */
+
+.sidenote {
+  width: var(--note-width);
+  margin-right: calc(-1 * (var(--note-width) + var(--note-gap)));
+  line-height: 1.45;
+  font-style: normal;
+  font-weight: normal;
+  hyphens: auto;
+}
+
+.sidenote.left {
+  margin-left: calc(-1 * (var(--note-width) + var(--note-gap)));
+}
+
+label.sidenote-toggle {
+  color: var(--accent);
+}
+
+/* Markdown footnotes. With Zola's default `bottom_footnotes = false` each
+   definition is printed where it is written, so on wide screens it can sit
+   in the margin like a sidenote, and on narrow ones it stays in the text. */
+.footnote-reference a {
+  text-decoration: none;
+  padding: 0 0.1em;
+}
+
+.footnote-reference {
+  line-height: 0;
+  font-size: 0.7rem;
+}
+
+.footnote-definition {
+  display: flex;
+  gap: 0.35em;
+  margin: 0.75rem 0 0.75rem 1.5rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-indent: 0;
+}
+
+.footnote-definition p {
+  margin: 0;
+  text-indent: 0;
+}
+
+.footnote-definition-label {
+  flex: none;
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+.footnote-definition:target {
+  outline: 1.5px solid var(--sidenote-target-border-color);
+  outline-offset: 0.3rem;
+}
+
+@media (min-width: 1051px) {
+  .footnote-definition {
+    float: right;
+    clear: right;
+    width: var(--note-width);
+    /* The negative top margin lifts the note beside the last line of the
+       paragraph it follows. */
+    margin: -1.65rem calc(-1 * (var(--note-width) + var(--note-gap))) 1em 0;
+    text-align: left;
+  }
+}
+
+/* Footnote definitions gathered at the very end of a page, the way most
+   existing markdown is written, have no paragraph to sit beside. Set that
+   trailing run as ordinary footnotes under a rule. */
+.footnote-definition:not(:has(~ :not(.footnote-definition))) {
+  float: none;
+  width: auto;
+  margin: 0.45rem 0 0;
+  font-size: 0.85rem;
+}
+
+:not(.footnote-definition) + .footnote-definition:not(:has(~ :not(.footnote-definition))) {
+  margin-top: 3rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--footnotes-border-color);
+}
+
+/* Footnotes and sidenotes are numbered separately. On a page that uses
+   both, sidenotes switch to letters so that two notes never share a mark. */
+body:has(.footnote-reference) .sidenote-number::after {
+  content: counter(sidenote-counter, lower-alpha);
+}
+
+body:has(.footnote-reference) .sidenote-number ~ .sidenote::before {
+  content: counter(sidenote-counter, lower-alpha) ' ';
+}
+
+/* With `bottom_footnotes = true` Zola collects them at the end instead. */
+.footnotes {
+  margin-top: 3rem;
+  padding-top: 0.5rem;
+}
+
+.footnotes ol {
+  padding-left: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Small screens. Kept after everything it overrides.
+ * ------------------------------------------------------------------ */
+
+/* Phones. */
+@media (max-width: 34rem) {
+  /* Header: the name on its own line, then one row of menu, search and
+     button, with the search field taking whatever width is left. */
+  .site-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .site-title {
+    font-size: 1.4rem;
+  }
+
+  .site-nav {
+    margin-left: 0;
+    gap: 0.25rem 0.95rem;
+  }
+
+  .site-nav > a {
+    padding: 0.3rem 0;
+  }
+
+  /* Search and button travel together: on one row with the menu if there
+     is room, otherwise on a row of their own. */
+  .site-tools {
+    flex: 1 1 9rem;
+  }
+
+  .site-search {
+    flex: 1 1 auto;
+  }
+
+  .site-search input[type='search'],
+  .site-search input[type='search']:focus {
+    width: 100%;
+  }
+
+  .scheme-toggle,
+  .site-links a {
+    padding: 0.35rem 0.15rem;
+  }
+
+  /* Homepage: a smaller portrait, and the sections start below it instead
+     of squeezing in beside it. */
+  .portrait {
+    width: 6.5rem;
+    max-width: 30%;
+    margin-left: 1rem;
+  }
+
+  .bio::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+
+  /* `photo_on_phones = false` */
+  .portrait-wide-only {
+    display: none;
+  }
+
+  .news li {
+    grid-template-columns: 3.7em 1fr;
+    gap: 0 0.5em;
+  }
+
+  .pub {
+    grid-template-columns: 5.75rem 1fr;
+    gap: 0 0.85rem;
+  }
+
+  .pub-highlight {
+    margin: 0 -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Two cards across. */
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .card-body {
+    padding: 0.5rem 0.6rem 0.6rem;
+  }
+
+  /* Notes index: the date goes under the title instead of after a leader. */
+  .toc-entry {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .toc-entry::after {
+    display: none;
+  }
+
+  .toc-entry time {
+    font-size: 0.88rem;
+  }
+
+  .tag-row {
+    text-align: left;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+
+  .site-footer-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .site-links {
+    margin-left: 0;
+  }
+}
+
+/* Very narrow phones. */
+@media (max-width: 23rem) {
+  .pub {
+    grid-template-columns: 4.5rem 1fr;
+    gap: 0 0.7rem;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * 10. Print
+ * ------------------------------------------------------------------ */
+
+@media print {
+  .dark-invert {
+    filter: none !important;
+  }
+
+  html {
+    font-size: 11pt;
+  }
+
+  body {
+    display: block;
+    max-width: none;
+    min-height: 0;
+    padding: 0;
+    overflow: visible;
+    color: #000;
+    background: #fff;
+    --accent: #000;
+  }
+
+  .site-nav,
+  .news-older summary,
+  label.sidenote-toggle:not(.sidenote-number) {
+    display: none;
+  }
+
+  a,
+  a:visited {
+    color: #000;
+  }
+
+  .new {
+    animation: none;
+  }
+
+  /* Margin notes go back into the text column. */
+  .sidenote,
+  .sidenote.left,
+  .footnote-definition {
+    display: flex;
+    float: none;
+    width: auto;
+    margin: 0.4rem 0 0.6rem 1.5rem;
+    text-align: left;
+  }
+
+  .sidenote,
+  .sidenote.left {
+    display: block;
+  }
+
+  pre,
+  figure,
+  .pub,
+  .theorem,
+  .lemma,
+  .proposition,
+  .corollary,
+  .definition {
+    break-inside: avoid;
+  }
+
+  h1, h2, h3, h4 {
+    break-after: avoid;
+  }
+
+  pre {
+    white-space: pre-wrap;
+    border: 1px solid #999;
+    background: #fff;
+  }
+}

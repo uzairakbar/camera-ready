@@ -1,0 +1,348 @@
+{#
+  Camera Ready components.
+
+  The first half is what authors use in markdown:
+
+      {% <theorem name="Identification"> %}
+      Under relevance and exclusion, the parameter is identified.
+      {% </theorem> %}
+
+      {{ <figure src="plot.png" caption="A plot." /> }}
+
+  The second half (names starting with `cr.`) is used by the templates.
+#}
+
+{# ---------------------------------------------------------------- #
+ #  Theorem-like environments
+ # ---------------------------------------------------------------- #}
+
+{% component cr.env(kind: string, name: string = "", id: string = "", content: string = "") -%}
+<div class="{{ kind }}"{% if id %} id="{{ id }}"{% endif %}>{% if name %}<span class="env-name">({{ name }})</span>{% endif %}
+
+{{ content | safe }}
+
+</div>
+{%- endcomponent cr.env %}
+
+{% component theorem(name: string = "", id: string = "") %}{{ <cr.env kind="theorem" name={name} id={id} content={body} /> }}{% endcomponent theorem %}
+{% component lemma(name: string = "", id: string = "") %}{{ <cr.env kind="lemma" name={name} id={id} content={body} /> }}{% endcomponent lemma %}
+{% component proposition(name: string = "", id: string = "") %}{{ <cr.env kind="proposition" name={name} id={id} content={body} /> }}{% endcomponent proposition %}
+{% component corollary(name: string = "", id: string = "") %}{{ <cr.env kind="corollary" name={name} id={id} content={body} /> }}{% endcomponent corollary %}
+{% component definition(name: string = "", id: string = "") %}{{ <cr.env kind="definition" name={name} id={id} content={body} /> }}{% endcomponent definition %}
+{% component example(name: string = "", id: string = "") %}{{ <cr.env kind="example" name={name} id={id} content={body} /> }}{% endcomponent example %}
+{% component remark(name: string = "", id: string = "") %}{{ <cr.env kind="remark" name={name} id={id} content={body} /> }}{% endcomponent remark %}
+
+{# `of` is printed after "Proof.", e.g. of="of Theorem 1". #}
+{% component proof(of: string = "") -%}
+<div class="proof"{% if of %} title="{{ of }}. "{% endif %}>
+
+{{ body | safe }}
+
+</div>
+{%- endcomponent proof %}
+
+{% component abstract(title: string = "Abstract") -%}
+<div class="abstract">
+<h2 class="no-number">{{ title }}</h2>
+
+{{ body | safe }}
+
+</div>
+{%- endcomponent abstract %}
+
+{# ---------------------------------------------------------------- #
+ #  Sidenotes (LaTeX.css markup, no JavaScript)
+ # ---------------------------------------------------------------- #}
+
+{# A numbered note in the right margin. On narrow screens the number is a
+   tap target that opens the note. Options: side="left", and symbol="⊕" for
+   an unnumbered note. #}
+{% component sidenote(side: string = "right", symbol: string = "") -%}
+{%- set id = "sn-" ~ get_hash(literal=body ~ symbol ~ side, sha_type=256, base64=false)[:10] -%}
+<label for="{{ id }}" class="sidenote-toggle{% if not symbol %} sidenote-number{% endif %}">{{ symbol }}</label><input type="checkbox" id="{{ id }}" class="sidenote-toggle"><span class="sidenote{% if side == 'left' %} left{% endif %}">{{ body | trim | safe }}</span>
+{%- endcomponent sidenote %}
+
+{# ---------------------------------------------------------------- #
+ #  Figures and tables
+ # ---------------------------------------------------------------- #}
+
+{# `src` is a file next to the page (or any path Zola can find). Raster
+   images wider than `max_width` pixels are resized at build time. #}
+{% component figure(src: string, alt: string = "", caption: string = "", width: string = "", max_width: integer = 1600, dark_invert: bool = false, @page = none, @section = none) -%}
+{%- set owner = page or section -%}
+{%- set path = src -%}
+{%- if owner and owner.colocated_path and not src is starting_with(pat="/") and not src is starting_with(pat="@/") -%}
+  {%- set local = get_image_metadata(path=owner.colocated_path ~ src, allow_missing=true) -%}
+  {%- if local %}{% set path = owner.colocated_path ~ src %}{% endif -%}
+{%- endif -%}
+{%- set meta = get_image_metadata(path=path, allow_missing=true) -%}
+{%- if not meta -%}
+  {{ throw(message="camera-ready: figure image not found: \"" ~ src ~ "\". Put it next to the page's index.md or in static/.") }}
+{%- endif -%}
+{%- if meta.format != "svg" and meta.format != "gif" and meta.width > max_width -%}
+  {%- set img = resize_image(path=path, width=max_width, op="fit_width") -%}
+  {%- set url = img.url -%}{%- set w = img.width -%}{%- set h = img.height -%}
+{%- else -%}
+  {%- set url = get_url(path=path) -%}{%- set w = meta.width -%}{%- set h = meta.height -%}
+{%- endif -%}
+<figure>
+<img{% if dark_invert %} class="dark-invert"{% endif %} src="{{ url }}" alt="{{ alt or caption | markdown(inline=true) | striptags }}" width="{{ w }}" height="{{ h }}" loading="lazy" decoding="async"{% if width %} style="width: {{ width }}"{% endif %}>
+{% if caption %}<figcaption>{{ caption | markdown(inline=true) | safe }}</figcaption>{% endif %}
+</figure>
+{%- endcomponent figure %}
+
+{# Wraps a markdown table to give it a numbered caption and a border preset:
+   borders="booktabs" (default), "grid" or "none". Column alignment comes
+   from markdown's own `:--`, `:-:`, `--:` syntax. #}
+{% component table(caption: string = "", borders: string = "booktabs") -%}
+<div class="table-figure{% if borders == 'grid' %} table-grid{% elif borders == 'none' %} table-plain{% endif %}">
+{% if caption %}<p class="table-caption">{{ caption | markdown(inline=true) | safe }}</p>{% endif %}
+
+{{ body | safe }}
+
+</div>
+{%- endcomponent table %}
+
+{# Rarely needed: stop a phrase from wrapping, or let a long string break
+   anywhere. #}
+{% component nowrap() %}<span class="whitespace-nowrap">{{ body | safe }}</span>{% endcomponent nowrap %}
+{% component breakall() %}<span class="break-all">{{ body | safe }}</span>{% endcomponent breakall %}
+{% component smallcaps() %}<span class="small-caps">{{ body | safe }}</span>{% endcomponent smallcaps %}
+{% component latex() %}<span class="latex">L<span>a</span>T<span>e</span>X</span>{% endcomponent latex %}
+{% component noindent() %}<p class="no-indent">{{ body | safe }}</p>{% endcomponent noindent %}
+
+{# ---------------------------------------------------------------- #
+ #  Internal: used by the templates
+ # ---------------------------------------------------------------- #}
+
+{# BibTeX text to HTML: common accents, braces, dashes, and $maths$. #}
+{% component cr.detex(text: string) -%}
+{%- set t = text | regex_replace(pattern=`\\s+`, rep=" ") -%}
+{%- set accents = [
+  [`"a`, "ä"], [`"o`, "ö"], [`"u`, "ü"], [`"A`, "Ä"], [`"O`, "Ö"], [`"U`, "Ü"], [`"e`, "ë"], [`"i`, "ï"],
+  [`'a`, "á"], [`'e`, "é"], [`'i`, "í"], [`'o`, "ó"], [`'u`, "ú"], [`'y`, "ý"], [`'c`, "ć"], [`'n`, "ń"], [`'s`, "ś"], [`'z`, "ź"], [`'E`, "É"], [`'A`, "Á"], [`'S`, "Ś"],
+  ["`a", "à"], ["`e", "è"], ["`i", "ì"], ["`o", "ò"], ["`u", "ù"],
+  [`\\^a`, "â"], [`\\^e`, "ê"], [`\\^i`, "î"], [`\\^o`, "ô"], [`\\^u`, "û"],
+  [`~n`, "ñ"], [`~a`, "ã"], [`~o`, "õ"], [`~N`, "Ñ"],
+  [`c\\{c`, "ç"], [`c\\{C`, "Ç"], [`v\\{s`, "š"], [`v\\{c`, "č"], [`v\\{z`, "ž"], [`v\\{r`, "ř"], [`v\\{e`, "ě"], [`v\\{S`, "Š"], [`v\\{C`, "Č"], [`v\\{Z`, "Ž"],
+  [`ss\\b`, "ß"], [`o\\b`, "ø"], [`O\\b`, "Ø"], [`aa\\b`, "å"], [`AA\\b`, "Å"], [`ae\\b`, "æ"], [`l\\b`, "ł"], [`L\\b`, "Ł"], [`i\\b`, "ı"]
+] -%}
+{%- if t is containing(pat="\\") -%}
+{%- for a in accents -%}
+  {%- set_global t = t | regex_replace(pattern=`\\{?\\\\` ~ a[0] ~ `\\}?(?:\\{\\})?\\}?`, rep=a[1]) -%}
+{%- endfor -%}
+{%- endif -%}
+{%- set t = t | replace(from=`\\&`, to="&") | replace(from=`\\%`, to="%") | replace(from=`\\_`, to="_") | replace(from=`\\#`, to="#") -%}
+{%- set t = t | escape_html -%}
+{#- Maths keeps its braces: protect it, strip the BibTeX braces, restore. -#}
+{%- set parts = t | split(pat="$") -%}
+{%- for p in parts -%}
+  {%- if loop.index0 % 2 == 1 and not loop.last -%}
+    $<code>{{ p | safe }}</code>$
+  {%- else -%}
+    {{ p | regex_replace(pattern=`[{}]`, rep="") | replace(from="---", to="—") | replace(from="--", to="–") | regex_replace(pattern=`(\\S)~(\\S)`, rep="$1&nbsp;$2") | replace(from="``", to="“") | replace(from="''", to="”") | safe }}
+  {%- endif -%}
+{%- endfor -%}
+{%- endcomponent cr.detex %}
+
+{# "Last, First and First Last*" -> linked, highlighted author list. #}
+{% component cr.authors(raw: string, me: array, initials: bool = false, people: map) -%}
+{%- set chunks = raw | regex_replace(pattern=`\\s+`, rep=" ") | split(pat=" and ") -%}
+{#- "A. One, B. Two and C. Three" is not BibTeX, but people write it. A chunk
+    with two or more commas is taken as a comma-separated list of names. -#}
+{%- set names = [] -%}
+{%- for c in chunks -%}
+  {%- set pieces = c | split(pat=",") -%}
+  {%- if pieces | length > 2 -%}
+    {%- for piece in pieces %}{% if piece | trim %}{% set_global names = [...names, piece | trim] %}{% endif %}{% endfor -%}
+  {%- else -%}
+    {%- set_global names = [...names, c] -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- for n in names -%}
+  {%- set mark = "" -%}
+  {%- if n is containing(pat="*") %}{% set mark = mark ~ "*" %}{% endif -%}
+  {%- if n is containing(pat="†") %}{% set mark = mark ~ "†" %}{% endif -%}
+  {%- set clean = n | replace(from="*", to="") | replace(from="†", to="") | trim -%}
+  {%- set parts = clean | split(pat=",") -%}
+  {%- if parts | length > 1 -%}
+    {%- set clean = (parts[1] | trim) ~ " " ~ (parts[0] | trim) -%}
+  {%- endif -%}
+  {#- `author_initials`: given names become initials, "Ada Maria Lovelace"
+      to "A. M. Lovelace". Lower-case particles (van, de) are left alone. -#}
+  {%- set words = clean | split(pat=" ") -%}
+  {%- set short = clean -%}
+  {%- if initials and words | length > 1 -%}
+    {%- set n_given = words | length - 1 -%}
+    {%- set short = (words[:n_given] | join(sep=" ") | regex_replace(pattern=`(\\p{Lu})[\\p{L}'’]+`, rep="$1.")) ~ " " ~ words[n_given] -%}
+  {%- endif -%}
+  {%- set shown = <cr.detex text={short} /> | trim -%}
+  {%- if clean == "others" -%}
+    et&nbsp;al.
+  {%- else -%}
+    {#- Your own name is marked and never linked. Anyone else is linked if
+        `data/authors.toml` has their name, in any of the forms it is written. -#}
+    {%- set is_me = shown in me or clean in me or short in me -%}
+    {%- set home = people | get(key=clean, default="") or people | get(key=short, default="") or people | get(key=shown, default="") -%}
+    {%- if is_me -%}
+    <span class="me">{{ shown | safe }}</span>
+    {%- elif home -%}
+    <a href="{{ <cr.href to={home | trim} /> }}">{{ shown | safe }}</a>
+    {%- else -%}
+    <span>{{ shown | safe }}</span>
+    {%- endif -%}
+    {%- if mark %}<sup>{{ mark }}</sup>{% endif %}
+  {%- endif -%}
+  {%- if not loop.last %}{% if loop.index == loop.length - 1 %}{% if loop.length > 2 %},{% endif %} and {% else %}, {% endif %}{% endif -%}
+{%- endfor -%}
+{%- endcomponent cr.authors %}
+
+{# A site path or an absolute URL -> a URL. #}
+{% component cr.href(to: string, prefix: string = "") -%}
+{%- if to is starting_with(pat="http://") or to is starting_with(pat="https://") or to is starting_with(pat="mailto:") -%}
+  {{ to | safe }}
+{%- elif prefix -%}
+  {{ prefix | safe }}{{ to | safe }}
+{%- else -%}
+  {{ get_url(path=to) | safe }}
+{%- endif -%}
+{%- endcomponent cr.href %}
+
+{# A 4:3 thumbnail, resized at build time to twice its display size. #}
+{# One thumbnail image, scaled down but never cropped. SVG and GIF files are used as they
+   are, so an animated GIF stays animated. #}
+{% component cr.thumbimg(path: string, alt: string = "", class: string = "") -%}
+{%- set meta = get_image_metadata(path=path, allow_missing=true) -%}
+{%- if not meta -%}
+  {{ throw(message="camera-ready: thumbnail not found: \"" ~ path ~ "\". Paths are relative to the site root or its static/ folder.") }}
+{%- endif -%}
+{%- if meta.format == "svg" or meta.format == "gif" -%}
+<img{% if class %} class="{{ class }}"{% endif %} src="{{ get_url(path=path) }}" alt="{{ alt }}" width="340" height="255" loading="lazy" decoding="async">
+{%- else -%}
+{#- Scaled to fit, never cropped: the stylesheet centres it in a 4:3 frame. -#}
+{%- set img = resize_image(path=path, width=400, height=300, op="fit") -%}
+<img{% if class %} class="{{ class }}"{% endif %} src="{{ img.url }}" alt="{{ alt }}" width="{{ img.width }}" height="{{ img.height }}" loading="lazy" decoding="async">
+{%- endif -%}
+{%- endcomponent cr.thumbimg %}
+
+{# A thumbnail, with an optional second image shown while the row is hovered. #}
+{% component cr.thumb(path: string, alt: string = "", hover: string = "", invert: bool = false) -%}
+{{ <cr.thumbimg path={path} alt={alt} class={"dark-invert" if invert else ""} /> }}
+{%- if hover %}{{ <cr.thumbimg path={hover} class="thumb-hover" /> }}{% endif -%}
+{%- endcomponent cr.thumb %}
+
+{# One publication row from a BibTeX entry. `full` spells the venue out, as
+   on the papers page; otherwise a short `abbr` is shown as a tag if given. #}
+{% component cr.pub(entry: map, me: array, full: bool = false, initials: bool = false, people: map) -%}
+{%- set t = entry.tags -%}
+{%- if not t.title or not t.author or not t.year -%}
+  {{ throw(message="camera-ready: publication \"" ~ entry.citation_key ~ "\" needs at least title, author and year fields") }}
+{%- endif -%}
+{%- set venue = t.booktitle or t.journal or t.howpublished or t.school or t.institution or t.publisher or "" -%}
+{%- if not venue and (t.arxiv or t.eprint) %}{% set venue = "arXiv preprint" %}{% endif -%}
+{%- set arxiv = t.arxiv or t.eprint or "" -%}
+{%- set main = t.url or t.pdf or "" -%}
+{%- set invert = false -%}
+{%- if t.dark_invert and t.dark_invert | lower | trim in ["true", "yes", "1"] %}{% set invert = true %}{% endif -%}
+{%- set highlight = t.highlight and t.highlight | lower | trim in ["true", "yes", "1"] -%}
+<li class="pub{% if highlight %} pub-highlight{% endif %}" id="{{ entry.citation_key | slugify }}">
+  <div class="pub-thumb">{% if t.thumbnail %}{{ <cr.thumb path={t.thumbnail | trim} hover={t.thumbnail_hover or "" | trim} invert={invert} /> }}{% endif %}</div>
+  <div class="pub-body">
+    <p class="pub-title">{% if main %}<a href="{{ <cr.href to={main | trim} /> }}">{% endif %}{{ <cr.detex text={t.title} /> }}{% if main %}</a>{% endif %}</p>
+    <p class="pub-authors">{{ <cr.authors raw={t.author} me={me} initials={initials} people={people} /> }}</p>
+{%- if t.abbr and not full %}
+    <p class="pub-venue"><span class="tag">{{ <cr.detex text={t.abbr} /> }} {{ t.year }}</span>{% if t.status %} <span class="tag tag-status">{{ <cr.detex text={t.status} /> }}</span>{% endif %}{% if t.note %} <span class="tag tag-note">{{ <cr.detex text={t.note} /> }}</span>{% endif %}</p>
+{%- else %}
+    <p class="pub-venue">{% if venue %}<em>{{ <cr.detex text={venue} /> }}</em>, {% endif %}{{ t.year }}{% if t.status %} <span class="tag tag-status">{{ <cr.detex text={t.status} /> }}</span>{% endif %}{% if t.note %} <span class="tag tag-note">{{ <cr.detex text={t.note} /> }}</span>{% endif %}</p>
+{%- endif %}
+{#- Every link field that is filled in is shown, in this order. A `links`
+    field narrows that down: `links = {pdf, bibtex}`. -#}
+{%- set only = [] -%}
+{%- if t.links %}{% set only = t.links | lower | regex_replace(pattern=`\\s+`, rep="") | split(pat=",") %}{% endif %}
+    <p class="pub-links">
+{%- if t.pdf and (not only or "pdf" in only) %}<a href="{{ <cr.href to={t.pdf | trim} /> }}">pdf</a>{% endif %}
+{%- if arxiv and (not only or "arxiv" in only) %}<a href="{{ <cr.href to={arxiv | trim} prefix="https://arxiv.org/abs/" /> }}">arxiv</a>{% endif %}
+{%- if t.doi and (not only or "doi" in only) %}<a href="{{ <cr.href to={t.doi | trim} prefix="https://doi.org/" /> }}">doi</a>{% endif %}
+{%- if t.code and (not only or "code" in only) %}<a href="{{ <cr.href to={t.code | trim} /> }}">code</a>{% endif %}
+{%- if t.data and (not only or "data" in only) %}<a href="{{ <cr.href to={t.data | trim} /> }}">data</a>{% endif %}
+{%- if t.slides and (not only or "slides" in only) %}<a href="{{ <cr.href to={t.slides | trim} /> }}">slides</a>{% endif %}
+{%- if t.poster and (not only or "poster" in only) %}<a href="{{ <cr.href to={t.poster | trim} /> }}">poster</a>{% endif %}
+{%- if t.video and (not only or "video" in only) %}<a href="{{ <cr.href to={t.video | trim} /> }}">video</a>{% endif %}
+{%- if t.talk and (not only or "talk" in only) %}<a href="{{ <cr.href to={t.talk | trim} /> }}">talk</a>{% endif %}
+{%- if t.website and (not only or "website" in only) %}<a href="{{ <cr.href to={t.website | trim} /> }}">webpage</a>{% endif %}
+{%- if t.bibtex and (not only or "bibtex" in only) %}<a href="{{ <cr.href to={t.bibtex | trim} /> }}">bibtex</a>{% endif %}
+    </p>
+{%- if t.blurb %}
+    <p class="pub-blurb">{{ <cr.detex text={t.blurb} /> }}</p>
+{%- endif %}
+  </div>
+</li>
+{%- endcomponent cr.pub %}
+
+{# News items from data/news.toml, with a "NEW!" badge on recent ones. The
+   badge is an animated GIF (`new_badge`). Behind it is the same drawing as
+   an inline SVG, shown instead when there is no image or when the visitor
+   asks for reduced motion, which a GIF cannot honour. #}
+{% component cr.news(items: array, recent_days: integer = 90, date_format: string = "%m/%Y", badge: string = "") -%}
+{%- set today = now() | date(format="%s") | int -%}
+<ul class="news">
+{%- for n in items %}
+{%- if not n.date or not n.text -%}
+  {{ throw(message="camera-ready: every [[news]] item needs a `date` (YYYY-MM-DD, no quotes) and a `text`; check item " ~ loop.index ~ " in your news file") }}
+{%- endif %}
+{%- set age = (today - (n.date | date(format="%s") | int)) / 86400 %}
+{%- set is_new = n.new if n.new is defined else (age >= 0 and age < recent_days) %}
+  <li><time datetime="{{ n.date | date(format='%Y-%m-%d') }}">{{ n.date | date(format=date_format) }}</time> <span>{{ n.text | markdown(inline=true) | safe }}{% if n.link %} <a href="{{ <cr.href to={n.link} /> }}">[link]</a>{% endif %}{% if is_new %} {% if badge %}<img class="new-gif" src="{{ get_url(path=badge) }}" alt="New" width="28" height="11">{% endif %}<svg class="new" viewBox="-1 -2 24 10" role="img" aria-label="New" shape-rendering="crispEdges"><g class="new-n"><rect x="-1" y="-1" width="7" height="7"/><path d="M0 0h1v1h-1zM4 0h1v1h-1zM0 1h2v1h-2zM4 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM4 2h1v1h-1zM0 3h1v1h-1zM3 3h2v1h-2zM0 4h1v1h-1zM4 4h1v1h-1z"/></g><g class="new-e"><rect x="6" y="-1" width="7" height="7"/><path d="M7 0h5v1h-5zM7 1h1v1h-1zM7 2h5v1h-5zM7 3h1v1h-1zM7 4h5v1h-5z"/></g><g class="new-w"><rect x="13" y="-1" width="7" height="7"/><path d="M14 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM14 1h1v1h-1zM16 1h1v1h-1zM18 1h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM14 3h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM15 4h1v1h-1zM17 4h1v1h-1z"/></g><g class="new-x"><rect x="20" y="-1" width="3" height="7"/><path d="M21 0h1v1h-1zM21 1h1v1h-1zM21 2h1v1h-1zM21 4h1v1h-1z"/></g></svg>{% endif %}</span></li>
+{%- endfor %}
+</ul>
+{%- endcomponent cr.news %}
+
+{# The tags of a page, as links. Used on the notes index and under a post's date. #}
+{% component cr.tags(of: map) -%}
+{%- if of.taxonomies and of.taxonomies.tags -%}
+<span class="tags">{% for tag in of.taxonomies.tags %}<a href="{{ get_taxonomy_url(kind="tags", name=tag, lang=of.lang) }}">{{ tag }}</a>{% endfor %}</span>
+{%- endif -%}
+{%- endcomponent cr.tags %}
+
+{# "View by tag" row: every tag with its number of pages. #}
+{% component cr.tagrow(taxonomies: array, label: string = "view by tag", current: string = "") -%}
+{%- set has_tags = false -%}
+{%- for t in taxonomies %}{% if t.name == "tags" %}{% set_global has_tags = true %}{% endif %}{% endfor -%}
+{%- if has_tags -%}
+{%- set tax = get_taxonomy(kind="tags", required=false) -%}
+{%- if tax and tax.items -%}
+<p class="tag-row"><a href="{{ tax.permalink }}">{{ label }}</a>: {% for term in tax.items %}<a href="{{ term.permalink }}"{% if term.name == current %} aria-current="page"{% endif %}>{{ term.name }}&nbsp;({{ term.page_count }})</a> {% endfor %}</p>
+{%- endif -%}
+{%- endif -%}
+{%- endcomponent cr.tagrow %}
+
+{# The dotted-leader list of posts used by the notes index and tag pages. #}
+{% component cr.postlist(pages: array, date_format: string = "%-d %B %Y") -%}
+<ol class="toc-list">
+{%- for post in pages %}
+  <li>
+    <div class="toc-entry"><a href="{{ post.permalink }}">{{ post.title }}</a>{% if post.date %}<time datetime="{{ post.date | date(format='%Y-%m-%d') }}">{{ post.date | date(format=date_format) }}</time>{% endif %}</div>
+{%- if post.description %}
+    <p class="toc-summary">{{ post.description | markdown(inline=true) | safe }}</p>
+{%- endif %}
+{%- if post.taxonomies and post.taxonomies.tags %}
+    <p class="toc-tags">{{ <cr.tags of={post} /> }}</p>
+{%- endif %}
+  </li>
+{%- endfor %}
+</ol>
+{%- endcomponent cr.postlist %}
+
+{# The site owner's links (extra.links), as icons where an `icon` is named. #}
+{% component cr.linkicons(links: array) -%}
+{%- for link in links %}
+{%- if not link.name or not link.url %}
+    {{ throw(message="camera-ready: every entry in extra.links needs a `name` and a `url`") }}
+{%- endif %}
+{%- if link.icon %}
+    <a class="site-icon" href="{{ <cr.href to={link.url} /> }}" title="{{ link.name }}" aria-label="{{ link.name }}"{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ <cr.icon name={link.icon} /> }}</a>
+{%- else %}
+    <a href="{{ <cr.href to={link.url} /> }}"{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ link.name }}</a>
+{%- endif %}
+{%- endfor %}
+{%- endcomponent cr.linkicons %}

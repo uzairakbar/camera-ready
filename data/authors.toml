@@ -1,0 +1,9 @@
+# Co-authors and their pages. A name listed here is linked wherever it
+# appears in an author list. Write it as it is written in publications.bib
+# ("First Last", whichever way round the .bib has it). Your own name is never
+# linked. This file is optional.
+
+"Tobias Wren" = "https://example.org/people/wren"
+"Yusuf Adeyemi" = "https://example.org/people/adeyemi"
+"Priya Raman" = "https://example.org/people/raman"
+"Jonas Müller" = "https://example.org/people/mueller"

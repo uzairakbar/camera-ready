@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}{{ term.name }} · {{ config.title }}{% endblock title %}
+
+{% block content %}
+<article>
+<h1>{{ term.name }}</h1>
+{{ <cr.tagrow taxonomies={config.taxonomies} label={config.extra.headings?.tags or "view by tag"} current={term.name} /> }}
+{{ <cr.postlist pages={term.pages} date_format={config.extra.date_format or "%-d %B %Y"} /> }}
+</article>
+{% endblock content %}
