@@ -23,7 +23,7 @@ Expand $`g`$ to first order around $`\theta`$: $`g(\hat\theta_n) - g(\theta) = G
 
 ## The ratio example
 
-The instrumental-variables estimator from [the previous note](@/notes/instrumental-variables/index.md) is a ratio of two sample covariances, $`\hat\beta = \hat a / \hat b`$. With $`g(a, b) = a / b`$ the Jacobian is $`G = (1/b,\; -a/b^2)`$, so
+The instrumental-variables estimator from [the previous note](@/blog/instrumental-variables/index.md) is a ratio of two sample covariances, $`\hat\beta = \hat a / \hat b`$. With $`g(a, b) = a / b`$ the Jacobian is $`G = (1/b,\; -a/b^2)`$, so
 
 $$`
 \operatorname{Var}(\hat\beta) \approx \frac{1}{n}\left( \frac{\sigma_a^2}{b^2} - \frac{2a\,\sigma_{ab}}{b^3} + \frac{a^2 \sigma_b^2}{b^4} \right).

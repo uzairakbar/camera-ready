@@ -10,7 +10,8 @@
 {% block content %}
 <div class="home">
 {%- set me = config.extra.author_names or [config.title] %}
-{%- set sections = config.extra.home_sections or ["news", "selected", "projects"] %}
+{%- set sections = config.extra.home_sections or ["news", "selected", "projects", "misc"] %}
+{%- set misc = load_data(path=config.extra.misc or "data/misc.toml", required=false) %}
 {#- Optional: co-authors' names and their pages. -#}
 {%- set people = load_data(path=config.extra.authors or "data/authors.toml", required=false) or {} %}
 {%- set bib = load_data(path=config.extra.publications or "data/publications.bib", format="bibtex", required=false) %}
@@ -95,7 +96,7 @@
 {%- else %}
     <h2>{{ config.extra.headings?.selected or "Selected works" }}</h2>
 {%- if config.extra.papers_page %}
-    <a class="section-more" href="{{ get_url(path=config.extra.papers_page, lang=lang) }}">{{ config.extra.headings?.all_papers or "View all" }} &rarr;</a>
+    <a class="section-more" href="{{ <cr.href to={config.extra.papers_page} /> }}">{{ config.extra.headings?.all_papers or "View all" }} &rarr;</a>
 {%- endif %}
 {%- endif %}
   </div>
@@ -164,8 +165,38 @@
 </section>
 {%- endif %}
 
+{%- elif name == "misc" %}
+{%- if misc and misc.groups %}
+
+{#- Labelled lists, as in a CV: experience, students, service, teaching. -#}
+<section id="misc">
+  <h2>{{ config.extra.headings?.misc or "Miscellanea" }}</h2>
+  <ul class="misc">
+{%- for g in misc.groups %}
+{%- if not g.title or not g.items %}
+  {{ throw(message="camera-ready: every [[groups]] block needs a `title` and a list of `items`; check block " ~ loop.index ~ " in your misc file") }}
+{%- endif %}
+    <li class="misc-group">
+      <div class="misc-label">{{ g.title }}</div>
+      <ul class="misc-items">
+{%- for item in g.items %}
+{%- if item is string %}
+        <li>{{ item | markdown(inline=true) | safe }}</li>
+{%- elif item.text %}
+        <li>{{ item.text | markdown(inline=true) | safe }}</li>
 {%- else %}
-{{ throw(message="camera-ready: unknown entry \"" ~ name ~ "\" in extra.home_sections; use \"news\", \"selected\" or \"projects\"") }}
+  {{ throw(message="camera-ready: an item under \"" ~ g.title ~ "\" in your misc file has no `text`") }}
+{%- endif %}
+{%- endfor %}
+      </ul>
+    </li>
+{%- endfor %}
+  </ul>
+</section>
+{%- endif %}
+
+{%- else %}
+{{ throw(message="camera-ready: unknown entry \"" ~ name ~ "\" in extra.home_sections; use \"news\", \"selected\", \"projects\" or \"misc\"") }}
 {%- endif %}
 {%- endfor %}
 </div>

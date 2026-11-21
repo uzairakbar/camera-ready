@@ -1,0 +1,34 @@
+# Labelled lists for the homepage. One [[groups]] block per label; each item
+# is one line of markdown. This file is optional.
+
+[[groups]]
+title = "Experience"
+items = [
+  "[Halden Institute](https://example.org/halden), Visiting Researcher - Causal Inference Group.",
+  "[Port Ellery University](https://example.org/port-ellery), Postdoctoral Fellow - Statistics.",
+  "[Brightwater Labs](https://example.org/brightwater), Research Intern - Experimentation Platform.",
+]
+
+[[groups]]
+title = "Students"
+items = [
+  "[Lena Okafor](https://example.org/people/okafor), PhD - Proximal Causal Learning.",
+  "[Sofía Halloran](https://example.org/people/halloran), PhD - Sensitivity Analysis.",
+  "[Jonas Müller](https://example.org/people/mueller), MSc - now PhD student at Port Ellery.",
+]
+
+[[groups]]
+title = "Services"
+items = [
+  "Area Chair, NeurIPS 2026",
+  "Reviewer, JMLR, Annals of Statistics, Biometrika",
+  "Reviewer, ICML 2026, 2025, 2024",
+]
+
+[[groups]]
+title = "Teaching"
+items = [
+  "[Causal Inference STAT 410](https://example.org/stat410) @ Northmoor, 2025, 2026",
+  "[Probability and Statistics STAT 201](https://example.org/stat201) @ Northmoor, 2024",
+  "[Topics in Econometrics STAT 620](https://example.org/stat620) @ Port Ellery, 2023",
+]

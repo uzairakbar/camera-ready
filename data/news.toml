@@ -6,7 +6,7 @@
 [[news]]
 date = 2026-11-04
 text = "Our paper on weak instruments was accepted to **JMLR**."
-link = "@/papers.md"
+link = "https://example.org/jmlr"
 
 [[news]]
 date = 2026-09-18
@@ -14,7 +14,7 @@ text = "Two papers accepted at NeurIPS 2026, one as an oral. See you in Vancouve
 
 [[news]]
 date = 2026-06-02
-text = "New note: [instrumental variables in twenty minutes](@/notes/instrumental-variables/index.md)."
+text = "New post: [instrumental variables in twenty minutes](@/blog/instrumental-variables/index.md)."
 
 [[news]]
 date = 2026-03-10

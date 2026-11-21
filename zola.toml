@@ -5,17 +5,17 @@
 # both are marked "YOUR SITE".
 
 base_url = "https://uzairakbar.github.io/camera-ready"
-title = "Mira Castellane"
-description = "Mira Castellane is a (fictional) statistician working on causal inference. Example site for the Camera Ready theme for Zola."
+title = "Mira Solane"
+description = "Mira Solane is a (fictional) statistician working on causal inference. Example site for the Camera Ready theme for Zola."
 default_language = "en"
 # YOUR SITE: uncomment the next line.
 # theme = "camera-ready"
-author = "Mira Castellane"
+author = "Mira Solane"
 
 generate_feeds = true
 feed_filenames = ["atom.xml"]
 
-# Lets notes carry tags: [taxonomies] tags = ["..."] in a post's front matter.
+# Lets posts carry tags: [taxonomies] tags = ["..."] in a post's front matter.
 taxonomies = [{ name = "tags" }]
 
 [markdown]
@@ -42,29 +42,28 @@ search = true
 search_shortcut = true
 scheme_toggle = true
 # With more papers than this the homepage shows only the `selected` ones and
-# links to the papers page. The default is 20; the example has six papers, so
+# adds a "View all" link. The default is 20; the example has seven papers, so
 # it is set low here to show that behaviour.
 papers_limit = 4
-subtitle = "Statistics, University of Northmoor"
 menu = [
-  { name = "papers", url = "@/papers.md" },
-  { name = "notes", url = "@/notes/_index.md" },
-  { name = "kitchen sink", url = "@/kitchen-sink/index.md" },
+  { name = "blog", url = "@/blog/_index.md" },
 ]
 # Shown after the menu. With `icon` the link is an icon; without, its name.
 links = [
   { name = "Email", url = "mailto:mira@example.org", icon = "email" },
-  { name = "Google Scholar", url = "https://example.org/scholar", icon = "scholar" },
+  { name = "Scholar", url = "https://example.org/scholar", icon = "scholar" },
   { name = "GitHub", url = "https://example.org/github", icon = "github" },
 ]
 photo = "img/portrait.png"
 photo_alt = "Line drawing of a person in front of a chalkboard"
-author_names = ["Mira Castellane"]
-home_sections = ["news", "selected", "projects"]
+author_names = ["Mira Solane"]
+home_sections = ["news", "selected", "projects", "misc"]
 publications = "data/publications.bib"
 news = "data/news.toml"
 projects = "data/projects.toml"
-papers_page = "@/papers.md"
+# Where "View all" goes: here a Scholar profile. It can also be a page of
+# your own site; see "Publications" in the README.
+papers_page = "https://example.org/scholar"
 news_visible = 4
 news_recent_days = 90
 accent = "#0a7d55"

@@ -1,6 +1,6 @@
 +++
-title = "Notes"
-description = "Short notes on statistics and causal inference."
+title = "Blog"
+description = "Short posts on statistics and causal inference."
 sort_by = "date"
 +++
 

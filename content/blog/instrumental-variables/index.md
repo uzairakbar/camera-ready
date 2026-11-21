@@ -90,4 +90,4 @@ The estimator divides by $`\operatorname{Cov}(z, x)`$. When that is close to zer
 | 100               | 0.43 | 1.00 | 0.17                   |
 {% </table> %}
 
-Tests that stay valid however weak the instrument is, such as the Anderson--Rubin test, are the subject of [another paper](@/papers.md).
+Tests that stay valid however weak the instrument is, such as the Anderson--Rubin test, are the subject of [another paper](@/_index.md).

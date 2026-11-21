@@ -117,7 +117,8 @@ filled-in link field appears. `talk` was added and `website` is now labelled
 
 **Phone layout was checked at 390px and 320px, not just narrowed.** Below
 34rem the header stacks (name, then menu with the search field filling the
-row), the portrait shrinks and the sections start beneath it, project cards
+row), the portrait shrinks and the sections start beneath it, publication
+thumbnails sit above their text at a small fixed height, project cards
 go two across, the notes index puts dates under titles, and wide numbered
 equations scroll with their number instead of having it printed over them.
 
@@ -130,7 +131,7 @@ this off.
 **The portrait can be left out on phones.** `photo_on_phones = false`, at
 the owner's request; shown by default.
 
-**The portrait float is not cleared.** With a short bio the next section
+**The portrait float is not cleared, except on phones.** With a short bio the next section
 starts beside the picture, as on the owner's current site, instead of leaving
 a gap.
 
@@ -145,6 +146,16 @@ everything and no papers page is needed; past it the homepage shows the
 `selected` entries and links to the full list. The owner asked for this in
 place of an always-separate papers page.
 
+**The demo has no papers page; "View all" goes to Scholar.** The brief asked
+for a full papers page. The owner later preferred a single homepage whose
+"View all" link points at a Google Scholar profile. `papers_page` now takes
+any URL and defaults to none. The year-grouped papers page is still in the
+theme (`papers.html`) for sites that want their own list.
+
+**The demo's section is "Blog", and the kitchen sink is a post in it.** A
+general audience reads "blog" more readily than "notes", and one menu entry
+is tidier than three. The section name is still whatever its `_index.md` says.
+
 **A second colour, for the note tag only.** The brief preferred one accent.
 The owner asked for "Spotlight" and "Oral" to stand out in magenta, so there
 is a `note_color`, used nowhere else.
@@ -156,14 +167,20 @@ default. Its original author and licence are unknown; `new_badge` swaps it
 for any other image, and `new_badge = ""` uses the redrawn SVG. The SVG is
 also what visitors with reduced motion see, since a GIF cannot be paused.
 
+**A "Miscellanea" section, set like a CV.** Jon Barron's page ends with
+coloured label blocks beside short lists. Here the label is small caps in the
+thumbnail column with a hairline between groups, so no new colour or box is
+introduced. Items are plain lines, as on his page: a
+right-aligned date column was tried and made the section read like a résumé.
+
 **Projects are cards; publications are rows.** The owner chose Yang-style
 cards (image on top) for projects. `projects_style = "rows"` gives the
 publication layout instead.
 
 **Publication thumbnails are frameless and sized by their text.** No border
 or backing, never cropped, and never taller than the row's text, so a square
-figure and a wide one sit comfortably in the same list. Dark-mode treatment
-of figures drawn for a white page is still to be settled.
+figure and a wide one sit comfortably in the same list. Figures drawn for
+a white page can opt in to `dark_invert`.
 
 **Publication titles are regular weight.** They were bold. Latin Modern's
 only bold is bold extended, and a list of bold, green, multi-line titles

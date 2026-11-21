@@ -6,13 +6,14 @@ like a LaTeX paper.
 ![The homepage in light mode and a post in dark mode](screenshot.png)
 
 **[Live demo](https://uzairakbar.github.io/camera-ready/)** ·
-[Kitchen sink](https://uzairakbar.github.io/camera-ready/kitchen-sink/)
+[Kitchen sink](https://uzairakbar.github.io/camera-ready/blog/kitchen-sink/)
 
 - **A homepage that gets to the point.** Name and links in one header line,
-  bio beside a portrait, dated news, selected works with thumbnails.
+  bio beside a portrait, dated news, selected works with thumbnails, and
+  CV-style lists for experience, service and teaching.
 - **You write markdown and edit data files.** Publications come from your
   `.bib` file, news from a small TOML file. You never touch HTML.
-- **One typeset look on every page.** Homepage, paper list, notes index and
+- **One typeset look on every page.** Homepage, publication list, blog index and
   posts share the Latin Modern typeface, an 80-character column and one accent
   colour, courtesy of [LaTeX.css](https://latex.vercel.app).
 - **Built to be left alone.** Nothing is loaded from another site: no CDN, no
@@ -21,7 +22,7 @@ like a LaTeX paper.
 - **Made for people who write maths.** Theorems, proofs, sidenotes, numbered
   equations, margin footnotes, highlighted code, figures and tables.
 
-The demo content is fictional. Mira Castellane, her papers and her university
+The demo content is fictional. Mira Solane, her papers and her university
 do not exist.
 
 ## Contents
@@ -63,21 +64,22 @@ yours by editing four things:
 | `zola.toml` | Your name (`title`), address (`base_url`), links, menu and options |
 | `content/_index.md` | Your bio, in markdown |
 | `data/publications.bib` | Your papers |
-| `data/news.toml`, `data/projects.toml` | News and projects. Delete a file to drop its section |
+| `data/news.toml`, `data/projects.toml`, `data/misc.toml` | News, projects, and the lists at the foot of the page. Delete a file to drop its section |
+| `data/authors.toml` | Optional: co-authors' pages, linked in author lists |
 
 Replace `content/img/portrait.png` with your own picture (or set `photo = ""`),
-delete the demo posts in `content/notes/`, and write your own. To publish, see
+delete the demo posts in `content/blog/`, and write your own. To publish, see
 [Deploying](#deploying).
 
 ## Writing
 
-A post is a markdown file in `content/notes/` with a title and a date:
+A post is a markdown file in `content/blog/` with a title and a date:
 
 ```markdown
 +++
 title = "Instrumental variables"
 date = 2026-11-20
-description = "One line for the notes index."
+description = "One line for the blog index."
 
 [extra]
 abstract = "Optional. Set like the abstract of a paper."
@@ -87,10 +89,10 @@ toc = true          # optional table of contents
 Ordinary paragraph with inline maths $`\beta = (Z^\top X)^{-1} Z^\top y`$.
 ```
 
-If a post has images, make it a folder: `content/notes/my-post/index.md`, with
+If a post has images, make it a folder: `content/blog/my-post/index.md`, with
 the images beside it.
 
-The section is called "Notes" only because `content/notes/_index.md` says so.
+The section is called "Blog" only because `content/blog/_index.md` says so.
 Change its `title` to "Blog", rename the folder, and update the `menu` entry.
 
 ### Maths
@@ -157,9 +159,9 @@ highlighted at build time: ` ```python `, with optional `linenos`,
 `hl_lines=2-3` and `name=file.py`. A few inline HTML tags are styled if you
 need them: `<mark>`, `<kbd>`, `<ins>`, `<sub>`, `<sup>`, `<small>`.
 
-The [kitchen sink](https://uzairakbar.github.io/camera-ready/kitchen-sink/)
+The [kitchen sink](https://uzairakbar.github.io/camera-ready/blog/kitchen-sink/)
 shows all of it; its source is
-[`content/kitchen-sink/index.md`](content/kitchen-sink/index.md).
+[`content/blog/kitchen-sink/index.md`](content/blog/kitchen-sink/index.md).
 
 ## Publications, news and projects
 
@@ -169,9 +171,12 @@ Use the BibTeX file you already have. Entries appear in file order.
 
 With up to `papers_limit` entries (20 by default, about what a Google Scholar
 profile shows before "Show more") the homepage lists them all under
-"Publications", and you do not need a papers page. With more, the homepage
-shows only the entries marked `selected`, under "Selected works", and links
-to the papers page, which groups everything by year.
+"Publications". With more, the homepage shows only the entries marked
+`selected`, under "Selected works", with a "View all" link to `papers_page`.
+Point that at your Google Scholar profile, as the demo does, or keep the full
+list on your own site: create `content/papers.md` with
+`template = "papers.html"` in its front matter and set
+`papers_page = "@/papers.md"`. That page groups everything by year.
 
  `title`, `author` and `year` are required.
 The venue is taken from `booktitle`, `journal`, `howpublished`, `school`,
@@ -184,7 +189,7 @@ The venue is taken from `booktitle`, `journal`, `howpublished`, `school`,
 | `thumbnail_hover = {img/paper.gif}` | A second image shown while the pointer is on the row, as on Jon Barron's site. Animated GIFs stay animated |
 | `dark_invert = {true}` | For a thumbnail in dark ink on white: invert it in dark mode, keeping its colours |
 | `blurb = {One sentence.}` | Short description under the entry |
-| `abbr = {NeurIPS}` | Short venue name. The homepage shows it with the year as a tag; the papers page spells the venue out |
+| `abbr = {NeurIPS}` | Short venue name. The homepage shows it with the year as a tag; a full papers page spells the venue out |
 | `note = {Oral}` | A second tag after the venue, in `note_color` |
 | `status = {In submission}` | A grey tag after the venue |
 | `highlight = {true}` | Tint the row |
@@ -197,7 +202,7 @@ Your own name is underlined in author lists; list its spellings in
 `data/authors.toml` with lines such as
 `"Tobias Wren" = "https://example.org/wren"`. A linked name looks like plain
 text and takes the same underline when hovered. Mark equal contribution with an asterisk after a name,
-`{Castellane*, Mira and Raman*, Priya}`, and a legend is added. Names are
+`{Solane*, Mira and Raman*, Priya}`, and a legend is added. Names are
 printed as the file has them; set `author_initials = true` to print every
 given name as an initial, so a file that mixes "Ada Lovelace" and
 "A. Lovelace" comes out consistent. Common LaTeX
@@ -232,12 +237,28 @@ text = "A small library for IV estimation."
 links = [{ name = "code", url = "https://example.org/ivkit" }]
 ```
 
+### Miscellanea
+
+Experience, students, service, teaching and the like go in `data/misc.toml`
+as labelled lists, set like a CV:
+
+```toml
+[[groups]]
+title = "Teaching"
+items = [
+  "[Causal Inference STAT 410](https://example.org) @ Northmoor, 2025, 2026",
+  "Probability and Statistics STAT 201 @ Northmoor, 2024",
+]
+```
+
+Each item is one line of markdown; write dates into the line if you want them.
+
 A missing file, or one left out of `home_sections`, simply hides its section.
 A malformed file stops the build with a message naming the file and the item.
 
 ### Tags
 
-Notes can carry tags. Declare the taxonomy once in `zola.toml`, above the
+Posts can carry tags. Declare the taxonomy once in `zola.toml`, above the
 first `[section]`:
 
 ```toml
@@ -251,7 +272,7 @@ and tag a post in its front matter:
 tags = ["causal inference", "statistics"]
 ```
 
-The notes index then gets a "view by tag" row, each tag gets a page listing
+The blog index then gets a "view by tag" row, each tag gets a page listing
 its posts, and a post shows its tags under its date. Leave the taxonomy out
 and none of this appears.
 
@@ -263,7 +284,7 @@ Everything goes under `[extra]` in `zola.toml`. All of it is optional.
 |---|---|---|
 | `subtitle` | `""` | Small line under your name in the header |
 | `links` | `[]` | Your links elsewhere, shown in the footer and under the bio. With `icon` they show as icons in the footer: `[{ name = "GitHub", url = "…", icon = "github" }]`. Icons: `github`, `gitlab`, `linkedin`, `x`, `twitter`, `scholar`, `google-scholar`, `orcid`, `youtube`, `instagram`, `bluesky`, `mastodon`, `email`, `cv`, `rss`, `link` |
-| `menu` | `[]` | Top-right navigation: `[{ name = "papers", url = "@/papers.md" }]`. A `url` can also be a file in `static/`, such as `cv.pdf` |
+| `menu` | `[]` | Top-right navigation: `[{ name = "blog", url = "@/blog/_index.md" }]`. A `url` can also be a file in `static/`, such as `cv.pdf` |
 | `links_position` | `"footer"` | Icon links at the right of the footer, or `"header"` to put them after the menu |
 | `bio_links` | `true` | Also list `links` as words under the bio: GitHub / Scholar / … |
 | `search` | `false` | A small search field in the header, handing the query to DuckDuckGo limited to your site |
@@ -275,12 +296,13 @@ Everything goes under `[extra]` in `zola.toml`. All of it is optional.
 | `photo_position` | `"margin"` | `"margin"` hangs the portrait in the right margin on wide screens, like a sidenote, and moves it into the column on narrow ones. `"inline"` always keeps it in the column |
 | `author_names` | site title | Spellings of your name to underline in author lists |
 | `authors` | `"data/authors.toml"` | Optional file of co-author names and their pages |
-| `home_sections` | `["news", "selected", "projects"]` | Homepage sections, in order. Remove one to hide it |
-| `headings` | | Rename headings: `{ news = "Updates", selected = "Papers" }`. Keys: `news`, `older_news`, `publications`, `selected`, `all_papers`, `projects`, `tags`, `tags_title`, `abstract`, `contents` |
+| `home_sections` | `["news", "selected", "projects", "misc"]` | Homepage sections, in order. Remove one to hide it |
+| `misc` | `"data/misc.toml"` | Optional file of labelled lists (experience, students, service, teaching) |
+| `headings` | | Rename headings: `{ news = "Updates", selected = "Papers" }`. Keys: `news`, `older_news`, `publications`, `selected`, `all_papers`, `projects`, `misc`, `tags`, `tags_title`, `abstract`, `contents` |
 | `publications`, `news`, `projects` | `data/…` | Paths of the data files |
 | `projects_style` | `"cards"` | Projects as a grid of cards with the image on top; the whole card links to the project's `url`. Or `"rows"`, to match the publication list and show each project's `links` |
-| `papers_limit` | `20` | Up to this many publications the homepage lists them all. Past it, only `selected` ones, with a link to the papers page. `0` always uses the selected list |
-| `papers_page` | `"@/papers.md"` | Target of the "View all" link shown past `papers_limit`. Empty for none |
+| `papers_limit` | `20` | Up to this many publications the homepage lists them all. Past it, only `selected` ones, with a "View all" link to `papers_page`. `0` always uses the selected list |
+| `papers_page` | `""` | Target of the "View all" link shown past `papers_limit`: a URL such as your Google Scholar profile, or `"@/papers.md"` for a full list on your own site. Empty for no link |
 | `author_initials` | `false` | Print given names as initials in author lists |
 | `news_visible` | `5` | News items shown before "Older news" |
 | `news_recent_days` | `90` | How long an item is "New!" |

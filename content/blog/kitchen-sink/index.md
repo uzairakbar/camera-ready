@@ -2,7 +2,10 @@
 title = "Kitchen sink"
 description = "Every feature of the Camera Ready theme on one page, following the LaTeX.css demo."
 date = 2026-11-21
-authors = ["Mira Castellane"]
+authors = ["Mira Solane"]
+
+[taxonomies]
+tags = ["theme"]
 
 [extra]
 toc = true
