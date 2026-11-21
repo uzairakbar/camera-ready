@@ -58,7 +58,7 @@
 {#- The same links again as plain words under the bio, as on Jon Barron's page. -#}
 {%- set bio_links = config.extra.bio_links if config.extra.bio_links is defined else true %}
 {%- if bio_links and config.extra.links %}
-  <p class="bio-links">{% for link in config.extra.links %}<a href="{{ <cr.href to={link.url} /> }}">{{ link.name }}</a> {% endfor %}</p>
+  <p class="bio-links">{% for link in config.extra.links %}{% if link.bio is not defined or link.bio %}<a href="{{ <cr.href to={link.url} /> }}">{{ link.name }}</a> {% endif %}{% endfor %}</p>
 {%- endif %}
 </section>
 

@@ -286,7 +286,7 @@ Everything goes under `[extra]` in `zola.toml`. All of it is optional.
 | `links` | `[]` | Your links elsewhere, shown in the footer and under the bio. With `icon` they show as icons in the footer: `[{ name = "GitHub", url = "…", icon = "github" }]`. Icons: `github`, `gitlab`, `linkedin`, `x`, `twitter`, `scholar`, `google-scholar`, `orcid`, `youtube`, `instagram`, `bluesky`, `mastodon`, `email`, `cv`, `rss`, `link` |
 | `menu` | `[]` | Top-right navigation: `[{ name = "blog", url = "@/blog/_index.md" }]`. A `url` can also be a file in `static/`, such as `cv.pdf` |
 | `links_position` | `"footer"` | Icon links at the right of the footer, or `"header"` to put them after the menu |
-| `bio_links` | `true` | Also list `links` as words under the bio: GitHub / Scholar / … |
+| `bio_links` | `true` | Also list `links` as words under the bio: GitHub / Scholar / …. Add `bio = false` to a link to keep it out of that row while its icon stays in the footer |
 | `search` | `false` | A small search field in the header, handing the query to DuckDuckGo limited to your site |
 | `search_shortcut` | `false` | Let `/` jump to the search field. A few lines of JavaScript; the field works without it |
 | `search_site` | from `base_url` | The site to search, if different: `"example.org"` |
