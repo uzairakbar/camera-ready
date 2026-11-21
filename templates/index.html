@@ -9,6 +9,7 @@
 
 {% block content %}
 <div class="home">
+{%- set blank = false %}{% if config.markdown.external_links_target_blank %}{% set blank = true %}{% endif %}
 {%- set me = config.extra.author_names or [config.title] %}
 {%- set sections = config.extra.home_sections or ["news", "selected", "projects", "misc"] %}
 {%- set misc = load_data(path=config.extra.misc or "data/misc.toml", required=false) %}
@@ -58,7 +59,7 @@
 {#- The same links again as plain words under the bio, as on Jon Barron's page. -#}
 {%- set bio_links = config.extra.bio_links if config.extra.bio_links is defined else true %}
 {%- if bio_links and config.extra.links %}
-  <p class="bio-links">{% for link in config.extra.links %}{% if link.bio is not defined or link.bio %}<a href="{{ <cr.href to={link.url} /> }}">{{ link.name }}</a> {% endif %}{% endfor %}</p>
+  <p class="bio-links">{% for link in config.extra.links %}{% if link.bio is not defined or link.bio %}<a href="{{ <cr.href to={link.url} /> }}"{{ <cr.blank to={link.url} on={blank} /> }}>{{ link.name }}</a> {% endif %}{% endfor %}</p>
 {%- endif %}
 </section>
 
@@ -75,11 +76,11 @@
 
 <section id="news">
   <h2>{{ config.extra.headings?.news or "News" }}</h2>
-  {{ <cr.news items={items[:visible]} recent_days={config.extra.news_recent_days or 90} date_format={config.extra.news_date_format or "%m/%Y"} badge={new_badge} /> }}
+  {{ <cr.news items={items[:visible]} recent_days={config.extra.news_recent_days or 90} date_format={config.extra.news_date_format or "%m/%Y"} badge={new_badge} blank={blank} /> }}
 {%- if items | length > visible %}
   <details class="news-older">
     <summary>{{ config.extra.headings?.older_news or "Older" }}</summary>
-    {{ <cr.news items={items[visible:]} recent_days={config.extra.news_recent_days or 90} date_format={config.extra.news_date_format or "%m/%Y"} badge={new_badge} /> }}
+    {{ <cr.news items={items[visible:]} recent_days={config.extra.news_recent_days or 90} date_format={config.extra.news_date_format or "%m/%Y"} badge={new_badge} blank={blank} /> }}
   </details>
 {%- endif %}
 </section>
@@ -96,7 +97,7 @@
 {%- else %}
     <h2>{{ config.extra.headings?.selected or "Selected works" }}</h2>
 {%- if config.extra.papers_page %}
-    <a class="section-more" href="{{ <cr.href to={config.extra.papers_page} /> }}">{{ config.extra.headings?.all_papers or "View all" }} &rarr;</a>
+    <a class="section-more" href="{{ <cr.href to={config.extra.papers_page} /> }}"{{ <cr.blank to={config.extra.papers_page} on={blank} /> }}>{{ config.extra.headings?.all_papers or "View all" }} &rarr;</a>
 {%- endif %}
 {%- endif %}
   </div>
@@ -105,7 +106,7 @@
 {%- endif %}
   <ol class="pubs{% if not pub_thumbs %} no-thumbs{% endif %}">
 {%- for e in shown %}
-{{ <cr.pub entry={e} people={people} me={me} initials={initials} /> }}
+{{ <cr.pub entry={e} blank={blank} people={people} me={me} initials={initials} /> }}
 {%- endfor %}
   </ol>
 </section>
@@ -136,7 +137,7 @@
       <div class="pub-thumb">{{ <cr.thumb path={p.thumbnail} hover={p.thumbnail_hover or ""} invert={p.dark_invert or false} /> }}</div>
 {%- endif %}
       <div class="card-body">
-        <p class="pub-title">{% if p.url %}<a href="{{ <cr.href to={p.url} /> }}">{% endif %}{{ p.name }}{% if p.url %}</a>{% endif %}</p>
+        <p class="pub-title">{% if p.url %}<a href="{{ <cr.href to={p.url} /> }}"{{ <cr.blank to={p.url} on={blank} /> }}>{% endif %}{{ p.name }}{% if p.url %}</a>{% endif %}</p>
 {%- if p.text %}
         <p class="card-text">{{ p.text | markdown(inline=true) | safe }}</p>
 {%- endif %}
@@ -150,12 +151,12 @@
     <li class="pub">
       <div class="pub-thumb">{% if p.thumbnail %}{{ <cr.thumb path={p.thumbnail} hover={p.thumbnail_hover or ""} invert={p.dark_invert or false} /> }}{% endif %}</div>
       <div class="pub-body">
-        <p class="pub-title">{% if p.url %}<a href="{{ <cr.href to={p.url} /> }}">{% endif %}{{ p.name }}{% if p.url %}</a>{% endif %}</p>
+        <p class="pub-title">{% if p.url %}<a href="{{ <cr.href to={p.url} /> }}"{{ <cr.blank to={p.url} on={blank} /> }}>{% endif %}{{ p.name }}{% if p.url %}</a>{% endif %}</p>
 {%- if p.text %}
         <p>{{ p.text | markdown(inline=true) | safe }}</p>
 {%- endif %}
 {%- if p.links %}
-        <p class="pub-links">{% for l in p.links %}<a href="{{ <cr.href to={l.url} /> }}">{{ l.name }}</a>{% endfor %}</p>
+        <p class="pub-links">{% for l in p.links %}<a href="{{ <cr.href to={l.url} /> }}"{{ <cr.blank to={l.url} on={blank} /> }}>{{ l.name }}</a>{% endfor %}</p>
 {%- endif %}
       </div>
     </li>

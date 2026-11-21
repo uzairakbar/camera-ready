@@ -100,6 +100,13 @@ Light mode is untouched. Borrowed in
 spirit from Terenin's academic-paper theme. It is opt-in per image because
 it ruins photographs.
 
+**Links can open in a new tab, by Zola's own switch.** With
+`external_links_target_blank = true` Zola does this for links in markdown;
+the theme applies the same setting to the links it writes itself (menu,
+publication links, authors, icons) and to PDF and BibTeX files. Zola's
+default is off and a theme cannot change it, so the demo config, which new
+sites start from, switches it on.
+
 **"/" focuses the search field, optionally.** `search_shortcut` adds a
 ten-line script. Off by default, like the search field itself.
 

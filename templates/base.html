@@ -101,6 +101,7 @@
 </script>
 {%- endif %}
 
+{%- set blank = false %}{% if config.markdown.external_links_target_blank %}{% set blank = true %}{% endif %}
 <header class="site-header">
   <div class="site-brand">
     <a class="site-title" href="{{ get_url(path='/', lang=lang) }}">{{ config.title }}</a>
@@ -112,10 +113,10 @@
   <nav class="site-nav" aria-label="Site">
 {%- for item in menu %}
 {%- set item_url = get_url(path=item.url, lang=lang) if item.url is starting_with(pat="@/") else <cr.href to={item.url} /> | trim %}
-    <a href="{{ item_url | safe }}"{% if current_url and current_url == item_url %} aria-current="page"{% endif %}>{{ item.name }}</a>
+    <a href="{{ item_url | safe }}"{% if current_url and current_url == item_url %} aria-current="page"{% endif %}{{ <cr.blank to={item.url} on={blank} /> }}>{{ item.name }}</a>
 {%- endfor %}
 {%- if links_position == "header" %}
-{{ <cr.linkicons links={links} /> }}
+{{ <cr.linkicons links={links} blank={blank} /> }}
 {%- endif %}
 {%- if search or toggle %}
     <span class="site-tools">
@@ -163,11 +164,11 @@
 {%- if config.extra.footer %}
     <p>{{ config.extra.footer | markdown(inline=true) | safe }}</p>
 {%- else %}
-    <p>&copy; {{ now() | date(format="%Y") }} {{ config.title }}. Typeset with <a href="https://github.com/uzairakbar/camera-ready">Camera Ready</a>.</p>
+    <p>&copy; {{ now() | date(format="%Y") }} {{ config.title }}. Typeset with <a href="https://github.com/uzairakbar/camera-ready"{{ <cr.blank to="https://github.com/uzairakbar/camera-ready" on={blank} /> }}>Camera Ready</a>.</p>
 {%- endif %}
 {%- if links and links_position == "footer" %}
     <nav class="site-links" aria-label="Elsewhere">
-{{ <cr.linkicons links={links} /> }}
+{{ <cr.linkicons links={links} blank={blank} /> }}
     </nav>
 {%- endif %}
   </div>

@@ -11,6 +11,7 @@
 {%- endblock math %}
 
 {% block content %}
+{%- set blank = false %}{% if config.markdown.external_links_target_blank %}{% set blank = true %}{% endif %}
 {%- set me = config.extra.author_names or [config.title] %}
 {#- Optional: co-authors' names and their pages. -#}
 {%- set people = load_data(path=config.extra.authors or "data/authors.toml", required=false) or {} %}
@@ -32,7 +33,7 @@
   <ol class="pubs no-thumbs">
 {%- for e in entries %}
 {%- if e.tags.year == year %}
-{{ <cr.pub entry={e} people={people} me={me} full={true} initials={config.extra.author_initials or false} /> }}
+{{ <cr.pub entry={e} blank={blank} people={people} me={me} full={true} initials={config.extra.author_initials or false} /> }}
 {%- endif %}
 {%- endfor %}
   </ol>

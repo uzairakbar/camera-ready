@@ -146,7 +146,7 @@
 {%- endcomponent cr.detex %}
 
 {# "Last, First and First Last*" -> linked, highlighted author list. #}
-{% component cr.authors(raw: string, me: array, initials: bool = false, people: map) -%}
+{% component cr.authors(raw: string, me: array, initials: bool = false, people: map, blank: bool = false) -%}
 {%- set chunks = raw | regex_replace(pattern=`\\s+`, rep=" ") | split(pat=" and ") -%}
 {#- "A. One, B. Two and C. Three" is not BibTeX, but people write it. A chunk
     with two or more commas is taken as a comma-separated list of names. -#}
@@ -187,7 +187,7 @@
     {%- if is_me -%}
     <span class="me">{{ shown | safe }}</span>
     {%- elif home -%}
-    <a href="{{ <cr.href to={home | trim} /> }}">{{ shown | safe }}</a>
+    <a href="{{ <cr.href to={home | trim} /> }}"{{ <cr.blank to={home | trim} on={blank} /> }}>{{ shown | safe }}</a>
     {%- else -%}
     <span>{{ shown | safe }}</span>
     {%- endif -%}
@@ -196,6 +196,12 @@
   {%- if not loop.last %}{% if loop.index == loop.length - 1 %}{% if loop.length > 2 %},{% endif %} and {% else %}, {% endif %}{% endif -%}
 {%- endfor -%}
 {%- endcomponent cr.authors %}
+
+{# ` target="_blank"` for a link that leaves the site or opens a file (PDF,
+   BibTeX, plain text), when the site has `external_links_target_blank = true`. #}
+{% component cr.blank(to: string, on: bool = false) -%}
+{%- if on and (to is starting_with(pat="http://") or to is starting_with(pat="https://") or to is ending_with(pat=".pdf") or to is ending_with(pat=".txt") or to is ending_with(pat=".bib")) %} target="_blank" rel="noopener"{% endif -%}
+{%- endcomponent cr.blank %}
 
 {# A site path or an absolute URL -> a URL. #}
 {% component cr.href(to: string, prefix: string = "") -%}
@@ -233,7 +239,7 @@
 
 {# One publication row from a BibTeX entry. `full` spells the venue out, as
    on the papers page; otherwise a short `abbr` is shown as a tag if given. #}
-{% component cr.pub(entry: map, me: array, full: bool = false, initials: bool = false, people: map) -%}
+{% component cr.pub(entry: map, me: array, full: bool = false, initials: bool = false, people: map, blank: bool = false) -%}
 {%- set t = entry.tags -%}
 {%- if not t.title or not t.author or not t.year -%}
   {{ throw(message="camera-ready: publication \"" ~ entry.citation_key ~ "\" needs at least title, author and year fields") }}
@@ -248,8 +254,8 @@
 <li class="pub{% if highlight %} pub-highlight{% endif %}" id="{{ entry.citation_key | slugify }}">
   <div class="pub-thumb">{% if t.thumbnail %}{{ <cr.thumb path={t.thumbnail | trim} hover={t.thumbnail_hover or "" | trim} invert={invert} /> }}{% endif %}</div>
   <div class="pub-body">
-    <p class="pub-title">{% if main %}<a href="{{ <cr.href to={main | trim} /> }}">{% endif %}{{ <cr.detex text={t.title} /> }}{% if main %}</a>{% endif %}</p>
-    <p class="pub-authors">{{ <cr.authors raw={t.author} me={me} initials={initials} people={people} /> }}</p>
+    <p class="pub-title">{% if main %}<a href="{{ <cr.href to={main | trim} /> }}"{{ <cr.blank to={main | trim} on={blank} /> }}>{% endif %}{{ <cr.detex text={t.title} /> }}{% if main %}</a>{% endif %}</p>
+    <p class="pub-authors">{{ <cr.authors raw={t.author} me={me} initials={initials} people={people} blank={blank} /> }}</p>
 {%- if t.abbr and not full %}
     <p class="pub-venue"><span class="tag">{{ <cr.detex text={t.abbr} /> }} {{ t.year }}</span>{% if t.status %} <span class="tag tag-status">{{ <cr.detex text={t.status} /> }}</span>{% endif %}{% if t.note %} <span class="tag tag-note">{{ <cr.detex text={t.note} /> }}</span>{% endif %}</p>
 {%- else %}
@@ -260,17 +266,17 @@
 {%- set only = [] -%}
 {%- if t.links %}{% set only = t.links | lower | regex_replace(pattern=`\\s+`, rep="") | split(pat=",") %}{% endif %}
     <p class="pub-links">
-{%- if t.pdf and (not only or "pdf" in only) %}<a href="{{ <cr.href to={t.pdf | trim} /> }}">pdf</a>{% endif %}
-{%- if arxiv and (not only or "arxiv" in only) %}<a href="{{ <cr.href to={arxiv | trim} prefix="https://arxiv.org/abs/" /> }}">arxiv</a>{% endif %}
-{%- if t.doi and (not only or "doi" in only) %}<a href="{{ <cr.href to={t.doi | trim} prefix="https://doi.org/" /> }}">doi</a>{% endif %}
-{%- if t.code and (not only or "code" in only) %}<a href="{{ <cr.href to={t.code | trim} /> }}">code</a>{% endif %}
-{%- if t.data and (not only or "data" in only) %}<a href="{{ <cr.href to={t.data | trim} /> }}">data</a>{% endif %}
-{%- if t.slides and (not only or "slides" in only) %}<a href="{{ <cr.href to={t.slides | trim} /> }}">slides</a>{% endif %}
-{%- if t.poster and (not only or "poster" in only) %}<a href="{{ <cr.href to={t.poster | trim} /> }}">poster</a>{% endif %}
-{%- if t.video and (not only or "video" in only) %}<a href="{{ <cr.href to={t.video | trim} /> }}">video</a>{% endif %}
-{%- if t.talk and (not only or "talk" in only) %}<a href="{{ <cr.href to={t.talk | trim} /> }}">talk</a>{% endif %}
-{%- if t.website and (not only or "website" in only) %}<a href="{{ <cr.href to={t.website | trim} /> }}">webpage</a>{% endif %}
-{%- if t.bibtex and (not only or "bibtex" in only) %}<a href="{{ <cr.href to={t.bibtex | trim} /> }}">bibtex</a>{% endif %}
+{%- if t.pdf and (not only or "pdf" in only) %}<a href="{{ <cr.href to={t.pdf | trim} /> }}"{{ <cr.blank to={t.pdf | trim} on={blank} /> }}>pdf</a>{% endif %}
+{%- if arxiv and (not only or "arxiv" in only) %}<a href="{{ <cr.href to={arxiv | trim} prefix="https://arxiv.org/abs/" /> }}"{{ <cr.blank to="https://" on={blank} /> }}>arxiv</a>{% endif %}
+{%- if t.doi and (not only or "doi" in only) %}<a href="{{ <cr.href to={t.doi | trim} prefix="https://doi.org/" /> }}"{{ <cr.blank to="https://" on={blank} /> }}>doi</a>{% endif %}
+{%- if t.code and (not only or "code" in only) %}<a href="{{ <cr.href to={t.code | trim} /> }}"{{ <cr.blank to={t.code | trim} on={blank} /> }}>code</a>{% endif %}
+{%- if t.data and (not only or "data" in only) %}<a href="{{ <cr.href to={t.data | trim} /> }}"{{ <cr.blank to={t.data | trim} on={blank} /> }}>data</a>{% endif %}
+{%- if t.slides and (not only or "slides" in only) %}<a href="{{ <cr.href to={t.slides | trim} /> }}"{{ <cr.blank to={t.slides | trim} on={blank} /> }}>slides</a>{% endif %}
+{%- if t.poster and (not only or "poster" in only) %}<a href="{{ <cr.href to={t.poster | trim} /> }}"{{ <cr.blank to={t.poster | trim} on={blank} /> }}>poster</a>{% endif %}
+{%- if t.video and (not only or "video" in only) %}<a href="{{ <cr.href to={t.video | trim} /> }}"{{ <cr.blank to={t.video | trim} on={blank} /> }}>video</a>{% endif %}
+{%- if t.talk and (not only or "talk" in only) %}<a href="{{ <cr.href to={t.talk | trim} /> }}"{{ <cr.blank to={t.talk | trim} on={blank} /> }}>talk</a>{% endif %}
+{%- if t.website and (not only or "website" in only) %}<a href="{{ <cr.href to={t.website | trim} /> }}"{{ <cr.blank to={t.website | trim} on={blank} /> }}>webpage</a>{% endif %}
+{%- if t.bibtex and (not only or "bibtex" in only) %}<a href="{{ <cr.href to={t.bibtex | trim} /> }}"{{ <cr.blank to={t.bibtex | trim} on={blank} /> }}>bibtex</a>{% endif %}
     </p>
 {%- if t.blurb %}
     <p class="pub-blurb">{{ <cr.detex text={t.blurb} /> }}</p>
@@ -283,7 +289,7 @@
    badge is an animated GIF (`new_badge`). Behind it is the same drawing as
    an inline SVG, shown instead when there is no image or when the visitor
    asks for reduced motion, which a GIF cannot honour. #}
-{% component cr.news(items: array, recent_days: integer = 90, date_format: string = "%m/%Y", badge: string = "") -%}
+{% component cr.news(items: array, recent_days: integer = 90, date_format: string = "%m/%Y", badge: string = "", blank: bool = false) -%}
 {%- set today = now() | date(format="%s") | int -%}
 <ul class="news">
 {%- for n in items %}
@@ -292,7 +298,7 @@
 {%- endif %}
 {%- set age = (today - (n.date | date(format="%s") | int)) / 86400 %}
 {%- set is_new = n.new if n.new is defined else (age >= 0 and age < recent_days) %}
-  <li><time datetime="{{ n.date | date(format='%Y-%m-%d') }}">{{ n.date | date(format=date_format) }}</time> <span>{{ n.text | markdown(inline=true) | safe }}{% if n.link %} <a href="{{ <cr.href to={n.link} /> }}">[link]</a>{% endif %}{% if is_new %} {% if badge %}<img class="new-gif" src="{{ get_url(path=badge) }}" alt="New" width="28" height="11">{% endif %}<svg class="new" viewBox="-1 -2 24 10" role="img" aria-label="New" shape-rendering="crispEdges"><g class="new-n"><rect x="-1" y="-1" width="7" height="7"/><path d="M0 0h1v1h-1zM4 0h1v1h-1zM0 1h2v1h-2zM4 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM4 2h1v1h-1zM0 3h1v1h-1zM3 3h2v1h-2zM0 4h1v1h-1zM4 4h1v1h-1z"/></g><g class="new-e"><rect x="6" y="-1" width="7" height="7"/><path d="M7 0h5v1h-5zM7 1h1v1h-1zM7 2h5v1h-5zM7 3h1v1h-1zM7 4h5v1h-5z"/></g><g class="new-w"><rect x="13" y="-1" width="7" height="7"/><path d="M14 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM14 1h1v1h-1zM16 1h1v1h-1zM18 1h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM14 3h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM15 4h1v1h-1zM17 4h1v1h-1z"/></g><g class="new-x"><rect x="20" y="-1" width="3" height="7"/><path d="M21 0h1v1h-1zM21 1h1v1h-1zM21 2h1v1h-1zM21 4h1v1h-1z"/></g></svg>{% endif %}</span></li>
+  <li><time datetime="{{ n.date | date(format='%Y-%m-%d') }}">{{ n.date | date(format=date_format) }}</time> <span>{{ n.text | markdown(inline=true) | safe }}{% if n.link %} <a href="{{ <cr.href to={n.link} /> }}"{{ <cr.blank to={n.link} on={blank} /> }}>[link]</a>{% endif %}{% if is_new %} {% if badge %}<img class="new-gif" src="{{ get_url(path=badge) }}" alt="New" width="28" height="11">{% endif %}<svg class="new" viewBox="-1 -2 24 10" role="img" aria-label="New" shape-rendering="crispEdges"><g class="new-n"><rect x="-1" y="-1" width="7" height="7"/><path d="M0 0h1v1h-1zM4 0h1v1h-1zM0 1h2v1h-2zM4 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM4 2h1v1h-1zM0 3h1v1h-1zM3 3h2v1h-2zM0 4h1v1h-1zM4 4h1v1h-1z"/></g><g class="new-e"><rect x="6" y="-1" width="7" height="7"/><path d="M7 0h5v1h-5zM7 1h1v1h-1zM7 2h5v1h-5zM7 3h1v1h-1zM7 4h5v1h-5z"/></g><g class="new-w"><rect x="13" y="-1" width="7" height="7"/><path d="M14 0h1v1h-1zM16 0h1v1h-1zM18 0h1v1h-1zM14 1h1v1h-1zM16 1h1v1h-1zM18 1h1v1h-1zM14 2h1v1h-1zM16 2h1v1h-1zM18 2h1v1h-1zM14 3h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM15 4h1v1h-1zM17 4h1v1h-1z"/></g><g class="new-x"><rect x="20" y="-1" width="3" height="7"/><path d="M21 0h1v1h-1zM21 1h1v1h-1zM21 2h1v1h-1zM21 4h1v1h-1z"/></g></svg>{% endif %}</span></li>
 {%- endfor %}
 </ul>
 {%- endcomponent cr.news %}
@@ -334,15 +340,15 @@
 {%- endcomponent cr.postlist %}
 
 {# The site owner's links (extra.links), as icons where an `icon` is named. #}
-{% component cr.linkicons(links: array) -%}
+{% component cr.linkicons(links: array, blank: bool = false) -%}
 {%- for link in links %}
 {%- if not link.name or not link.url %}
     {{ throw(message="camera-ready: every entry in extra.links needs a `name` and a `url`") }}
 {%- endif %}
 {%- if link.icon %}
-    <a class="site-icon" href="{{ <cr.href to={link.url} /> }}" title="{{ link.name }}" aria-label="{{ link.name }}"{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ <cr.icon name={link.icon} /> }}</a>
+    <a class="site-icon" href="{{ <cr.href to={link.url} /> }}"{{ <cr.blank to={link.url} on={blank} /> }} title="{{ link.name }}" aria-label="{{ link.name }}"{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ <cr.icon name={link.icon} /> }}</a>
 {%- else %}
-    <a href="{{ <cr.href to={link.url} /> }}"{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ link.name }}</a>
+    <a href="{{ <cr.href to={link.url} /> }}"{{ <cr.blank to={link.url} on={blank} /> }}{% if link.url is starting_with(pat="http") %} rel="me"{% endif %}>{{ link.name }}</a>
 {%- endif %}
 {%- endfor %}
 {%- endcomponent cr.linkicons %}

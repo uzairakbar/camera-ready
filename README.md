@@ -321,7 +321,7 @@ Everything goes under `[extra]` in `zola.toml`. All of it is optional.
 | `footer` | copyright line | Footer text, markdown |
 | `favicon` | `""` | Path of an icon in `static/` |
 
-Three settings live outside `[extra]` because they belong to Zola:
+Four settings live outside `[extra]` because they belong to Zola:
 
 ```toml
 default_language = "en"       # also selects hyphenation and theorem labels
@@ -330,6 +330,7 @@ default_language = "en"       # also selects hyphenation and theorem labels
 smart_punctuation = true      # curly quotes, -- to en dash
 definition_list = true
 bottom_footnotes = false      # see "Footnotes" above
+external_links_target_blank = true   # links to other sites, and to PDF and BibTeX files, open in a new tab
 
 [markdown.highlighting]       # code colours matching LaTeX.css's Prism theme
 style = "class"
